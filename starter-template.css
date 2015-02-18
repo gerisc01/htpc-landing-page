@@ -1,0 +1,16 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.row img {
+    max-width: 100%;
+    height: auto;
+}
+
+.container-fluid {
+    max-height:100px;
+}
