@@ -1,16 +1,32 @@
 body {
   padding-top: 50px;
 }
+
+body, html, .eminem-wraps {
+  height: 100%;
+}
+
 .starter-template {
   padding: 40px 15px;
   text-align: center;
 }
 
-.row img {
-    max-width: 100%;
-    height: auto;
+.eminem-wraps {
+	height: 100%;
 }
 
-.container-fluid {
-    max-height:100px;
+.img-wrapper {
+	width: 33%;
+	height: 50%;
+	border: solid;
+	border-width: 3px;
+	float: left;
+}
+
+.tile {
+	margin-left: auto;
+	margin-right: auto;
+	height: 75%;
+	text-align: center;
+	width: auto;
 }
