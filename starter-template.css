@@ -12,14 +12,15 @@ body, html, .eminem-wraps {
 }
 
 .eminem-wraps {
-	height: 100%;
+	padding: 2px;
+	height: 100%%;
 }
 
 .img-wrapper {
 	width: 33%;
-	height: 50%;
+	height: 33%;
 	border: solid;
-	border-width: 3px;
+	border-width: 2px;
 	float: left;
 }
 
@@ -27,6 +28,11 @@ body, html, .eminem-wraps {
 	margin-left: auto;
 	margin-right: auto;
 	height: 75%;
-	text-align: center;
 	width: auto;
+	display:block;
+}
+
+.selected {
+	border-color: yellow;
+	border-width: 5px;
 }
