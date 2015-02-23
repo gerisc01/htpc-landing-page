@@ -14,6 +14,7 @@ var gridHeight = dimensions[1];
 
 $(function() {
   $("body").keydown(function(e) {
+    // If any of the directional keys are pressed
     if ($.inArray(e.keyCode,[37,38,39,40]) != -1) {
       var currentSelected = $(".selected")[0];
       var currentId = parseInt(currentSelected.id);
@@ -39,6 +40,10 @@ $(function() {
       var newId = ((currentId + (gridWidth)) + tileCount) % tileCount;
       $(".selected").removeClass("selected");
       $("#"+newId.toString()).addClass("selected");
+    }
+    // If it is the enter key that is pressed
+    else if (e.keyCode == 13) {
+      // Create the link from the div to go to the next grid pattern
     }
   });
 });
