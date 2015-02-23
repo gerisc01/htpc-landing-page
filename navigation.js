@@ -15,7 +15,7 @@ var gridHeight = dimensions[1];
 $(function() {
   $("body").keydown(function(e) {
     // If any of the directional keys are pressed
-    if ($.inArray(e.keyCode,[37,38,39,40]) != -1) {
+    if ($.inArray(e.keyCode,[13,37,38,39,40]) != -1) {
       var currentSelected = $(".selected")[0];
       var currentId = parseInt(currentSelected.id);
       var currentRow = Math.floor((currentId)/gridWidth);
@@ -43,6 +43,7 @@ $(function() {
     }
     // If it is the enter key that is pressed
     else if (e.keyCode == 13) {
+      console.log(currentSelected.title);
       // Create the link from the div to go to the next grid pattern
     }
   });
