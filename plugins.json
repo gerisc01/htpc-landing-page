@@ -1,0 +1,42 @@
+{
+	"amount": 6,
+	"pluginsLocation" : "plugins",
+	"plugins" : {
+		"youtube" : {
+			"name" : "YouTube",
+			"folder" : "youtube",
+			"icon" : "youtube.jpg",
+			"config" : "youtube.json"
+		},
+		"twitch" : {
+			"name" : "Twitch",
+			"folder" : "twitch",
+			"icon" : "twitch.jpg",
+			"config" : "twitch.json"
+		},
+		"pocketcasts" : {
+			"name" : "PocketCasts",
+			"folder" : "pocketcasts",
+			"icon" : "pocketcasts.jpg",
+			"config" : "pocketcasts.json"
+		},
+		"mlb-at-bat" : {
+			"name" : "MLB At Bat",
+			"folder" : "mlb-at-bat",
+			"icon" : "mlb-at-bat.jpg",
+			"config" : "mlb-at-bat.json"
+		},
+		"mls-live" : {
+			"name" : "MLS Live",
+			"folder" : "mls-live",
+			"icon" : "mls-live.jpg",
+			"config" : "mls-live.json"
+		},
+		"nbc-sports" : {
+			"name" : "NBC Sports",
+			"folder" : "nbc-sports",
+			"icon" : "nbc-sports.jpg",
+			"config" : "nbc-sports.json"
+		}
+	}
+}
