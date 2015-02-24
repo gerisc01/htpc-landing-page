@@ -1,9 +1,9 @@
-var tileCount = 9;
+var tileCount = 6;
 var gridCount = tileCount;
 var dimensions = getGridDimensions(tileCount);
 // If the dimensions did not return a usable grid, try again
 var attempts = 1;
-while (dimensions[0] == 0) {
+while (dimensions[0] === 0) {
   dimensions = getGridDimensions(tileCount + attempts);
   attempts += 1;
 }
@@ -44,6 +44,7 @@ $(function() {
     // If it is the enter key that is pressed
     else if (e.keyCode == 13) {
       console.log(currentSelected.title);
+
       // Create the link from the div to go to the next grid pattern
     }
   });
@@ -69,5 +70,5 @@ function getGridDimensions(tiles) {
         }
       }
     }
-  return [width, height];
+  return [parseInt(width), parseInt(height)];
 }
