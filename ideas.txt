@@ -1,0 +1,46 @@
+What to do:
+
+Save id
+Wipe screen
+read plugin file
+find new grid count
+create grid
+populate grid
+
+
+YouTube
+CREATE javascript file that has methods for all the actions you want to use. Possible are auth(), getContent(), getSubscribers(), etc.
+
+LEVEL 1 — plugins.json
+id: youtube
+img: youtube.png
+folder: youtube
+
+LEVEL 2 — youtube.json
+id: channels
+img: channels.png
+folder: youtube
+
+LEVEL 3 — 
+
+
+{
+	"auth" : {
+		action: "auth()"
+	},
+	"1" : {
+		"subscriptions" : {
+			id: "",
+			img: "",
+			folder: "",
+			action: "getSubscribers()"
+		},
+		"popular" : {"action" : "getPopular()"},
+		"playlists" : {},
+		"search" : {}
+	}, 
+	"2" : {
+
+	}
+}
+
