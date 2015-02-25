@@ -1,0 +1,39 @@
+{
+    "tiles" : {
+        "subscribers" : {
+            "id": "",
+            "img": "",
+            "action": ""
+        },
+        "playlists" : {
+            "id": "",
+            "img": "",
+            "action": ""
+        },
+        "watchlater" : {
+            "id": "",
+            "img": "",
+            "action": ""
+        },
+        "popular" :{
+            "id": "",
+            "img": "",
+            "action": ""
+        },
+        "subscribers-list" : "getSubs()",
+        "playlists-list" : "getPlaylists()",
+        "videos-by-channel" : "getVideosByChannel()",
+        "videos-by-playlist" : "getVideosByPlaylist()",
+        "watchlater-videos" : "getWatchLaterVideos()",
+        "popular-videos" : "getPopularVideos()"
+    },
+    "layout" : {
+        "home" : ["subscribers","playlists","watchlater","popular"],
+        "subscribers" : "subscribers-list",
+        "playlists" : "playlists-list",
+        "watchlater" : "watchlater-videos",
+        "popular" : "popular-videos",
+        "subscribers-list" : "videos-by-channel",
+        "playlists-list" : "videos-by-playlist"
+    }
+}

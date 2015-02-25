@@ -1,7 +1,5 @@
-var plugins = {
-    "amount": 6,
-    "pluginsLocation" : "plugins",
-    "plugins" : {
+{
+    "tiles" : {
         "youtube" : {
             "name" : "YouTube",
             "folder" : "youtube",
@@ -38,5 +36,8 @@ var plugins = {
             "icon" : "nbc-sports.jpg",
             "config" : "nbc-sports.json"
         }
+    },
+    "layout" : {
+        "home" : ["youtube","twitch","pocketcasts","mlb-at-bat","mls-live","nbc-sports"]
     }
 }
