@@ -1,24 +1,28 @@
 {
     "tiles" : {
         "subscribers" : {
+            "title" : "Subscriptions",
             "id": "",
-            "icon": "",
-            "action": ""
+            "icon": "images/subscriptions.png",
+            "layout": "subscribers"
         },
         "playlists" : {
+            "title" : "Playlists",
             "id": "",
-            "icon": "",
-            "action": ""
+            "icon": "images/playlists.png",
+            "layout": "playlists"
         },
         "watchlater" : {
+            "title" : "Watch Later",
             "id": "",
-            "icon": "",
-            "action": ""
+            "icon": "images/watchlater.png",
+            "layout": "watchlater"
         },
         "popular" :{
+            "title" : "Popular",
             "id": "",
-            "icon": "",
-            "action": ""
+            "icon": "images/popular.jpg",
+            "layout": "popular"
         },
         "subscribers-list" : "getSubs()",
         "playlists-list" : "getPlaylists()",
@@ -27,7 +31,7 @@
         "watchlater-videos" : "getWatchLaterVideos()",
         "popular-videos" : "getPopularVideos()"
     },
-    "layout" : {
+    "layouts" : {
         "home" : ["subscribers","playlists","watchlater","popular"],
         "subscribers" : "subscribers-list",
         "playlists" : "playlists-list",

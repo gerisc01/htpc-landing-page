@@ -1,31 +1,37 @@
 {
     "tiles" : {
         "youtube" : {
+            "title" : "YouTube",
             "id" : "youtube",
             "icon" : "images/youtube.jpg",
             "layout" : "home"
         },
         "twitch" : {
+            "title" : "Twitch",
             "id" : "twitch",
             "icon" : "images/twitch.jpeg",
             "layout" : "home"
         },
         "pocketcasts" : {
+            "title" : "PocketCasts",
             "id" : "pocketcasts",
             "icon" : "images/pocketcasts.png",
             "layout" : "home"
         },
         "mlb-at-bat" : {
+            "title" : "MLB At Bat",
             "id" : "mlb-at-bat",
             "icon" : "images/mlb-at-bat.png",
             "layout" : "home"
         },
         "mls-live" : {
+            "title" : "MLS Live",
             "id" : "mls-live",
             "icon" : "images/mls-live.png",
             "layout" : "home"
         },
         "nbc-sports" : {
+            "title" : "NBC Sports",
             "id" : "nbc-sports",
             "icon" : "images/nbc-sports.jpg",
             "layout" : "home"

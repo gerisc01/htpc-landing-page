@@ -31,75 +31,21 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
+          <a class="navbar-brand" href="#">Media Center</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about" onclick="alert('click'); loadSecondPage(); return false;">About</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li class="active">
+                <a href="#">Home</a>
+                <input id="plugin" type="hidden"></input>
+                <input id="layout" type="hidden" value="home"></input>
+            </li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
 
     <div id="load-container" class="eminem-wraps"></div>
-     <script>
-     //     $("#load-container").load("index.html #home");
-     </script>
-
-     <div id="hidden">
-        <div id="home" class="eminem-wraps">
-            <div id="0" class="img-wrapper selected" title="youtube">
-                <img class="tile" src="1.png"/>
-            </div>
-            <div id="1" class="img-wrapper" title="twitch">
-                <img class="tile" src="2.png"/>
-            </div>
-            <div id="2" class="img-wrapper" title="pocketcasts">
-                <img class="tile" src="3.png"/>
-            </div>
-            <div id="3" class="img-wrapper" title="mls-live">
-                <img class="tile" src="4.png"/>
-            </div>
-            <div id="4" class="img-wrapper" title="mlb-at-bat">
-                <img class="tile" src="5.png"/>
-            </div>
-            <div id="5" class="img-wrapper" title="spotify">
-                <img class="tile" src="6.png"/>
-            </div>
-        </div>
-
-        <div id="second-page" class="eminem-wraps">
-            <div id="0" class="img-wrapper selected">
-                <img class="tile" src="2.png"/>
-            </div>
-            <div id="1" class="img-wrapper">
-                <img class="tile" src="3.png"/>
-            </div>
-            <div id="2" class="img-wrapper">
-                <img class="tile" src="4.png"/>
-            </div>
-            <div id="3" class="img-wrapper">
-                <img class="tile" src="5.png"/>
-            </div>
-            <div id="4" class="img-wrapper">
-                <img class="tile" src="6.png"/>
-            </div>
-            <div id="5" class="img-wrapper">
-                <img class="tile" src="1.png"/>
-            </div>
-            <div id="6" class="img-wrapper">
-                <img class="tile" src="2.png"/>
-            </div>
-            <div id="7" class="img-wrapper">
-                <img class="tile" src="3.png"/>
-            </div>
-            <div id="8" class="img-wrapper">
-                <img class="tile" src="4.png"/>
-            </div>
-        </div>
-    </div>
     <!-- </div>/.container -->
 
 
@@ -107,11 +53,5 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="bootstrap-3.3.2-dist/js/bootstrap.min.js"></script>
-    <script>
-        function loadSecondPage() {
-            $("#load-container").remove("#home");
-            $("#load-container").load("index.html #second-page", function() {alert("loaded");});
-        }
-    </script>
   </body>
 </html>
