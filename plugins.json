@@ -1,43 +1,37 @@
 {
     "tiles" : {
         "youtube" : {
-            "name" : "YouTube",
-            "folder" : "youtube",
-            "icon" : "youtube.jpg",
-            "config" : "youtube.json"
+            "id" : "youtube",
+            "icon" : "images/youtube.jpg",
+            "layout" : "home"
         },
         "twitch" : {
-            "name" : "Twitch",
-            "folder" : "twitch",
-            "icon" : "twitch.jpg",
-            "config" : "twitch.json"
+            "id" : "twitch",
+            "icon" : "images/twitch.jpeg",
+            "layout" : "home"
         },
         "pocketcasts" : {
-            "name" : "PocketCasts",
-            "folder" : "pocketcasts",
-            "icon" : "pocketcasts.jpg",
-            "config" : "pocketcasts.json"
+            "id" : "pocketcasts",
+            "icon" : "images/pocketcasts.png",
+            "layout" : "home"
         },
         "mlb-at-bat" : {
-            "name" : "MLB At Bat",
-            "folder" : "mlb-at-bat",
-            "icon" : "mlb-at-bat.jpg",
-            "config" : "mlb-at-bat.json"
+            "id" : "mlb-at-bat",
+            "icon" : "images/mlb-at-bat.png",
+            "layout" : "home"
         },
         "mls-live" : {
-            "name" : "MLS Live",
-            "folder" : "mls-live",
-            "icon" : "mls-live.jpg",
-            "config" : "mls-live.json"
+            "id" : "mls-live",
+            "icon" : "images/mls-live.png",
+            "layout" : "home"
         },
         "nbc-sports" : {
-            "name" : "NBC Sports",
-            "folder" : "nbc-sports",
-            "icon" : "nbc-sports.jpg",
-            "config" : "nbc-sports.json"
+            "id" : "nbc-sports",
+            "icon" : "images/nbc-sports.jpg",
+            "layout" : "home"
         }
     },
-    "layout" : {
+    "layouts" : {
         "home" : ["youtube","twitch","pocketcasts","mlb-at-bat","mls-live","nbc-sports"]
     }
 }

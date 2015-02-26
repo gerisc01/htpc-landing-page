@@ -1,34 +1,48 @@
-var jsoninput = '{"amount": 6,"pluginsLocation" : "plugins","plugins" : {"youtube" : {"name" : "YouTube","folder" : "youtube","icon" : "youtube.jpg","config" : "youtube.json"},"twitch" : {"name" : "Twitch","folder" : "twitch","icon" : "twitch.jpeg","config" : "twitch.json"},"pocketcasts" : {"name" : "PocketCasts","folder" : "pocketcasts","icon" : "pocketcasts.png","config" : "pocketcasts.json"},"mlb-at-bat" : {"name" : "MLB At Bat","folder" : "mlb-at-bat","icon" : "mlb-at-bat.png","config" : "mlb-at-bat.json"},"mls-live" : {"name" : "MLS Live","folder" : "mls-live","icon" : "mls-live.png","config" : "mls-live.json"},"nbc-sports" : {"name" : "NBC Sports","folder" : "nbc-sports","icon" : "nbc-sports.jpg","config" : "nbc-sports.json"}}}';
-var tileCount;
-var pluginsLocation;
+var jsoninput = '{ "tiles" : { "youtube" : { "id" : "youtube", "icon" : "images/youtube.jpg", "layout" : "home" }, "twitch" : { "id" : "twitch", "icon" : "images/twitch.jpeg", "layout" : "home" }, "pocketcasts" : { "id" : "pocketcasts", "icon" : "images/pocketcasts.png", "layout" : "home" }, "mlb-at-bat" : { "id" : "mlb-at-bat", "icon" : "images/mlb-at-bat.png", "layout" : "home" }, "mls-live" : { "id" : "mls-live", "icon" : "images/mls-live.png", "layout" : "home" }, "nbc-sports" : { "id" : "nbc-sports", "icon" : "images/nbc-sports.jpg", "layout" : "home" } }, "layouts" : { "home" : ["youtube","twitch","pocketcasts","mlb-at-bat","mls-live","nbc-sports"] } }';
+var youtubeinput = '{ "tiles" : { "subscribers" : { "title" : "Subscriptions", "id": "", "icon": "images/subscriptions.png", "layout": "subscribers" }, "playlists" : { "title" : "Playlists", "id": "", "icon": "images/playlists.png", "layout": "playlists" }, "watchlater" : { "title" : "Watch Later", "id": "", "icon": "images/watchlater.png", "layout": "watchlater" }, "popular" :{ "title" : "Popular", "id": "", "icon": "images/popular.jpg", "layout": "popular" }, "subscribers-list" : "getSubs()", "playlists-list" : "getPlaylists()", "videos-by-channel" : "getVideosByChannel()", "videos-by-playlist" : "getVideosByPlaylist()", "watchlater-videos" : "getWatchLaterVideos()", "popular-videos" : "getPopularVideos()" }, "layouts" : { "home" : ["subscribers","playlists","watchlater","popular"], "subscribers" : "subscribers-list", "playlists" : "playlists-list", "watchlater" : "watchlater-videos", "popular" : "popular-videos", "subscribers-list" : "videos-by-channel", "playlists-list" : "videos-by-playlist" } }';
+var tileCount = 0;
+var currentPlugin = null;
 
 // Document.ready function
 $(function() {
+  setupGrid(jsoninput, "home");
+});
+
+function setupGrid(config, layout) {
   // Load plugin file
-  var json = JSON.parse(jsoninput);
-  tileCount = json.amount;
-  pluginsLocation = json.pluginsLocation;
+  var json = JSON.parse(config);
 
   /***************************************************************************
                           CREATE THE MEDIA TILES
   ****************************************************************************/
-  var counter = 0;
-  for (var key in json.plugins) {
-    if (json.plugins.hasOwnProperty(key)) {
-      jQuery('<div/>', {
-          id: counter,
+  var keys = json.layouts[layout];
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    jQuery('<div/>', {
+          id: tileCount,
           class: "img-wrapper",
           title: key
       }).appendTo('#load-container');
 
-      var img_file = pluginsLocation + "/" + json.plugins[key].folder + "/" + json.plugins[key].icon;
+      var imgFile;
+      if (currentPlugin === null) {
+        imgFile = "plugins/" + key + "/" + json.tiles[key].icon;
+      } else {
+        imgFile = "plugins/" + currentPlugin + "/" + json.tiles[key].icon;
+      }
       jQuery('<img/>', {
         class: "tile",
-        src: img_file,
+        src: imgFile,
         'data-adaptive-background': '1'
-      }).appendTo('#'+counter);
-      counter += 1;
-    }
+      }).appendTo('#'+tileCount);
+
+      jQuery('<input/>', {
+        id: "layout",
+        type: "hidden",
+        text: json.tiles[key].layout
+      }).appendTo('#'+tileCount);
+
+      tileCount += 1;
   }
 
   $("#0").addClass("selected");
@@ -84,12 +98,25 @@ $(function() {
     }
     // If it is the enter key that is pressed
     else if (e.keyCode == 13) {
+      if (currentPlugin === null) {currentPlugin = currentSelected.title;}
       console.log(currentSelected.title);
+      // var configLocation = "plugins/" + currentPlugin + "/config.json"
+      // $.getJSON(configLocation, function(json) {         
+      //   var nextLayout = ;
+      // });
+      var nextLayout = $(".selected #layout").text();
+      clearLayout();
+      setupGrid(youtubeinput, nextLayout);
       // Create the link from the div to go to the next grid pattern
     }
   });
-});
+}
 
+function clearLayout() {
+  tileCount = 0;
+  $("#load-container").empty();
+  $("body").off("keydown");
+}
 
 function getGridDimensions(tiles) {
     var width = 0;
