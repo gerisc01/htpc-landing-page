@@ -11,7 +11,6 @@ $(function() {
 function setupGrid(config, layout) {
   // Load plugin file
   $.getJSON(config, function(json) {
-    
     /***************************************************************************
                             CREATE THE MEDIA TILES
     ****************************************************************************/

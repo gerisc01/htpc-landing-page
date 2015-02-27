@@ -24,7 +24,7 @@
             "icon": "images/popular.jpg",
             "layout": "popular"
         },
-        "subscribers-list" : "getSubs()",
+        "subscribers-list" : "/subs/{{user}}",
         "playlists-list" : "getPlaylists()",
         "videos-by-channel" : "getVideosByChannel()",
         "videos-by-playlist" : "getVideosByPlaylist()",
