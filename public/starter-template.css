@@ -22,13 +22,26 @@ body, html, .eminem-wraps {
     float: left;
 }
 
-.tile {
+.plugintile {
     margin-left: auto;
     margin-right: auto;
     padding-top: 2%;
     height: 95%;
     width: auto;
     display:block;
+}
+
+.tile-pic {
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 2%;
+    height: 60%;
+    width: auto;
+    display:block;
+}
+
+.center-title {
+    text-align: center;
 }
 
 .selected {

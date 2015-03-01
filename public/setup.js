@@ -2,128 +2,170 @@ var jsoninput = '{ "tiles" : { "youtube" : { "title" : "YouTube", "id" : "youtub
 var youtubeinput = '{ "tiles" : { "subscribers" : { "title" : "Subscriptions", "id": "", "icon": "images/subscriptions.png", "layout": "subscribers" }, "playlists" : { "title" : "Playlists", "id": "", "icon": "images/playlists.png", "layout": "playlists" }, "watchlater" : { "title" : "Watch Later", "id": "", "icon": "images/watchlater.png", "layout": "watchlater" }, "popular" :{ "title" : "Popular", "id": "", "icon": "images/popular.jpg", "layout": "popular" }, "subscribers-list" : "getSubs()", "playlists-list" : "getPlaylists()", "videos-by-channel" : "getVideosByChannel()", "videos-by-playlist" : "getVideosByPlaylist()", "watchlater-videos" : "getWatchLaterVideos()", "popular-videos" : "getPopularVideos()" }, "layouts" : { "home" : ["subscribers","playlists","watchlater","popular"], "subscribers" : "subscribers-list", "playlists" : "playlists-list", "watchlater" : "watchlater-videos", "popular" : "popular-videos", "subscribers-list" : "videos-by-channel", "playlists-list" : "videos-by-playlist" } }';
 var tileCount = 0;
 var currentPlugin = null;
+var configObj = null;
+
+$.ajaxSetup({
+   async: false
+ });
 
 // Document.ready function
 $(function() {
-  setupGrid("config.json", "home");
+  configObj = getGridConfig("config.json", "home");
+  setupGrid(configObj, "home");
 });
 
+function getGridConfig(config, layout) {
+  var configArray = [];
+  $.getJSON(config, function (json) {
+    var currentLayout = json.layouts[layout];
+    if (typeof currentLayout === 'string') {
+      var tileFunction = json.tiles[currentLayout]
+      var endpoint = "/" + currentPlugin + "/" + tileFunction;
+      resp = $.get(endpoint);
+      configArray = resp.responseJSON
+    } else {
+      for (var i = 0; i < currentLayout.length; i++) {
+        var key = currentLayout[i];
+        configArray.push(json.tiles[key]);
+      }
+    }
+  });
+  return configArray;
+}
+
 function setupGrid(config, layout) {
-  // Load plugin file
-  $.getJSON(config, function(json) {
-    /***************************************************************************
-                            CREATE THE MEDIA TILES
-    ****************************************************************************/
-    var keys = json.layouts[layout];
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      jQuery('<div/>', {
-            id: tileCount,
-            class: "img-wrapper",
-            title: key
-        }).appendTo('#load-container');
+  // Using the tileMap to easily access information for
+  // the tiles after one is selected.
+  tileMap = {}
+  /***************************************************************************
+                          CREATE THE MEDIA TILES
+  ****************************************************************************/
+  for (var i = 0; i < config.length; i++) {
+    var plugin = config[i];
+    jQuery('<div/>', {
+          id: tileCount,
+          class: "img-wrapper",
+          title: plugin.id
+      }).appendTo('#load-container');
 
-        var imgFile;
-        if (currentPlugin === null) {
-          imgFile = "plugins/" + key + "/" + json.tiles[key].icon;
-        } else {
-          imgFile = "plugins/" + currentPlugin + "/" + json.tiles[key].icon;
-        }
-        jQuery('<img/>', {
-          class: "tile",
-          src: imgFile,
-          'data-adaptive-background': '1'
+      var imgFile;
+      var tileClass = "tile-pic";
+      var coloredBackground = '0';
+      if (currentPlugin === null) {
+        imgFile = "plugins/" + plugin.id + "/" + plugin.icon;
+        tileClass = "plugintile";
+        coloredBackground = '1';
+      } else if (/https?:\/\//.exec(plugin.icon) != null) {
+        imgFile = plugin.icon
+      } else {
+        imgFile = "plugins/" + currentPlugin + "/" + plugin.icon;
+      }
+      jQuery('<img/>', {
+        class: tileClass,
+        src: imgFile,
+        'data-adaptive-background': coloredBackground
+      }).appendTo('#'+tileCount);
+
+      if (currentPlugin != null) {
+        jQuery('<h2/>', {
+          class: "center-title",
+          text: plugin.title
         }).appendTo('#'+tileCount);
+      }
 
-        jQuery('<input/>', {
-          id: "layout",
-          type: "hidden",
-          value: json.tiles[key].layout
-        }).appendTo('#'+tileCount);
+      jQuery('<input/>', {
+        id: "layout",
+        type: "hidden",
+        value: plugin.layout
+      }).appendTo('#'+tileCount);
 
-        tileCount += 1;
+      tileMap[plugin.id] = plugin;
+      tileCount += 1;
+  }
+
+  $("#0").addClass("selected");
+  $.adaptiveBackground.run();
+
+  /* Add the CSS needed to make the tiles fit on one page with no scrolling */
+
+  // Get the grid dimensions
+  var dimensions = getGridDimensions(tileCount);
+  // If the dimensions did not return a usable grid, try again
+  var attempts = 1;
+  while (dimensions[0] === 0) { // if the grid width is 0, no grid layouts were found
+    dimensions = getGridDimensions(tileCount + attempts);
+    attempts += 1;
+  }
+  var gridWidth = dimensions[0];
+  var gridHeight = dimensions[1];
+
+  var tileHeight = 100/gridHeight;
+  var tileWidth = 100/gridWidth;
+  $(".img-wrapper").css({"height" : tileHeight+"%", "width" : tileWidth+"%"});
+
+  /***************************************************************************
+                       ACTIVATE KEYBOARD NAVIGATION
+  ****************************************************************************/
+  $("body").keydown(function(e) {
+    var currentSelected;
+    var currentId;
+    var currentRow;
+    var newId;
+    // If any of the directional keys are pressed
+    if ($.inArray(e.keyCode,[8,13,37,38,39,40]) != -1) {
+      currentSelected = $(".selected")[0];
+      currentId = parseInt(currentSelected.id);
+      currentRow = Math.floor((currentId)/gridWidth);
     }
 
-    $("#0").addClass("selected");
-    $.adaptiveBackground.run();
-
-    /* Add the CSS needed to make the tiles fit on one page with no scrolling */
-
-    // Get the grid dimensions
-    var dimensions = getGridDimensions(tileCount);
-    // If the dimensions did not return a usable grid, try again
-    var attempts = 1;
-    while (dimensions[0] === 0) { // if the grid width is 0, no grid layouts were found
-      dimensions = getGridDimensions(tileCount + attempts);
-      attempts += 1;
+    if(e.keyCode == 37) { // left
+      newId = (((currentId - 1) + tileCount) % gridWidth) + currentRow * gridWidth;
+      $(".selected").removeClass("selected");
+      $("#"+newId.toString()).addClass("selected");
     }
-    var gridWidth = dimensions[0];
-    var gridHeight = dimensions[1];
-
-    var tileHeight = 100/gridHeight;
-    var tileWidth = 100/gridWidth;
-    $(".img-wrapper").css({"height" : tileHeight+"%", "width" : tileWidth+"%"});
-
-    /***************************************************************************
-                         ACTIVATE KEYBOARD NAVIGATION
-    ****************************************************************************/
-    $("body").keydown(function(e) {
-      var currentSelected;
-      var currentId;
-      var currentRow;
-      var newId;
-      // If any of the directional keys are pressed
-      if ($.inArray(e.keyCode,[8,13,37,38,39,40]) != -1) {
-        currentSelected = $(".selected")[0];
-        currentId = parseInt(currentSelected.id);
-        currentRow = Math.floor((currentId)/gridWidth);
+    else if (e.keyCode == 38) { // up
+      newId = ((currentId - (gridWidth)) + tileCount) % tileCount;
+      $(".selected").removeClass("selected");
+      $("#"+newId.toString()).addClass("selected");
+    }
+    else if(e.keyCode == 39) { // right
+      newId = (((currentId + 1) + tileCount) % gridWidth) + currentRow * gridWidth;
+      $(".selected").removeClass("selected");
+      $("#"+newId.toString()).addClass("selected");
+    }
+    else if(e.keyCode == 40) { // down
+      newId = ((currentId + (gridWidth)) + tileCount) % tileCount;
+      $(".selected").removeClass("selected");
+      $("#"+newId.toString()).addClass("selected");
+    }
+    else if (e.keyCode == 13) { // Enter
+      if (currentPlugin === null) {
+        currentPlugin = currentSelected.title;
+        $.get("/"+currentPlugin+"/init");
       }
-
-      if(e.keyCode == 37) { // left
-        newId = (((currentId - 1) + tileCount) % gridWidth) + currentRow * gridWidth;
-        $(".selected").removeClass("selected");
-        $("#"+newId.toString()).addClass("selected");
-      }
-      else if (e.keyCode == 38) { // up
-        newId = ((currentId - (gridWidth)) + tileCount) % tileCount;
-        $(".selected").removeClass("selected");
-        $("#"+newId.toString()).addClass("selected");
-      }
-      else if(e.keyCode == 39) { // right
-        newId = (((currentId + 1) + tileCount) % gridWidth) + currentRow * gridWidth;
-        $(".selected").removeClass("selected");
-        $("#"+newId.toString()).addClass("selected");
-      }
-      else if(e.keyCode == 40) { // down
-        newId = ((currentId + (gridWidth)) + tileCount) % tileCount;
-        $(".selected").removeClass("selected");
-        $("#"+newId.toString()).addClass("selected");
-      }
-      else if (e.keyCode == 13) { // Enter
-        if (currentPlugin === null) {currentPlugin = currentSelected.title;}
-        var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
-        var nextLayout = $(".selected #layout").val();
-        clearLayout();
-        addToNavbar(json.tiles[currentPlugin].title, currentPlugin, nextLayout);
-        setupGrid(configLocation, nextLayout);
-        //setupGrid(youtubeinput, nextLayout);
-      }
-      else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {
-          e.preventDefault();
-          if ($("ul.nav li").size() > 1) {
-            var prevLayout = $("ul.nav li").eq(-2).children("#layout").val();
-            if ($("ul.nav li").eq(-2).children("#plugin").val() === "") {
-              currentPlugin = null;
-            }
-
-            var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
-            clearLayout();
-            setupGrid(configLocation, prevLayout);
-            $("ul.nav li").eq(-1).remove();
-            $("ul.nav li").eq(-1).addClass("active");
+      var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
+      var nextLayout = $(".selected #layout").val();
+      addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
+      clearLayout();
+      var configObj = getGridConfig(configLocation, nextLayout);
+      setupGrid(configObj, nextLayout);
+    }
+    else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {
+        e.preventDefault();
+        if ($("ul.nav li").size() > 1) {
+          var prevLayout = $("ul.nav li").eq(-2).children("#layout").val();
+          if ($("ul.nav li").eq(-2).children("#plugin").val() === "") {
+            currentPlugin = null;
           }
-      }
-    });
+
+          var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
+          clearLayout();
+          var configObj = getGridConfig(configLocation, prevLayout);
+          setupGrid(configObj, prevLayout);
+          $("ul.nav li").eq(-1).remove();
+          $("ul.nav li").eq(-1).addClass("active");
+        }
+    }
   });
 }
 
