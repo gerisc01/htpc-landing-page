@@ -22,13 +22,13 @@ class YouTube
 	    return client
 	end
 
-	def getChannel(id, limit, offset)
+	def getChannels(id, limit, offset)
 		channel = @client.execute!(
 			:api_method => @youtube_discovered_api.subscriptions.list,
 			:parameters => {
 				:part => "snippet",
 				:mine => true,
-				:maxResults => 6
+				:maxResults => 16
 			}
 		)
 		resp = JSON.parse(channel.response.body)

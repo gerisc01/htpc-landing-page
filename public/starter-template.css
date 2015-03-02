@@ -18,8 +18,9 @@ body, html, .eminem-wraps {
 
 .img-wrapper {
     border: solid;
-    border-width: 2px;
+    border-width: 3px;
     float: left;
+    border-color: gray;
 }
 
 .plugintile {
@@ -46,7 +47,7 @@ body, html, .eminem-wraps {
 
 .selected {
     border-color: yellow;
-    border-width: 5px;
+    border-width: 3px;
 }
 
 #hidden {
