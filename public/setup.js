@@ -13,20 +13,23 @@ $(function() {
   setupGrid(configObj, "home");
 });
 
-function getGridConfig(config, layout) {
+function getGridConfig(config, layout, id) {
   var configArray = [];
   // If config is null, the passed layout is a endpoint for the nextPage
   if (config === null) {
-    console.log("config is equal to null");
-    console.log("next page endpoint is: " + layout);
     resp = $.get(layout);
     configArray = resp.responseJSON;
   } else {
     $.getJSON(config, function (json) {
       var currentLayout = json.layouts[layout];
+      console.log(currentLayout);
       if (typeof currentLayout === 'string') {
         var tileFunction = json.tiles[currentLayout];
+        console.log(tileFunction);
         var endpoint = "/" + currentPlugin + "/" + tileFunction + "?limit=" + maxTilesPerPage;
+        if (id !== undefined || id !== "") {
+          endpoint += "&id=" + id;
+        }
         resp = $.get(endpoint);
         configArray = resp.responseJSON;
       } else {
@@ -162,7 +165,7 @@ function setupGrid(config, layout) {
         addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
       }
       clearLayout();
-      var configObj = getGridConfig(configLocation, nextLayout);
+      var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
       setupGrid(configObj, nextLayout);
     }
     else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {

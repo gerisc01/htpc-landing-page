@@ -26,8 +26,8 @@
         },
         "subscribers-list" : "getChannels",
         "playlists-list" : "getPlaylists",
-        "videos-by-channel" : "getByChannel",
-        "videos-by-playlist" : "getByPlaylist",
+        "by-channel" : "getByChannel",
+        "by-playlist" : "getByPlaylist",
         "watchlater-videos" : "getWatchLater",
         "popular-videos" : "getPopular"
     },
@@ -37,7 +37,7 @@
         "playlists" : "playlists-list",
         "watchlater" : "watchlater-videos",
         "popular" : "popular-videos",
-        "subscribers-list" : "videos-by-channel",
-        "playlists-list" : "videos-by-playlist"
+        "subscribers-list" : "by-channel",
+        "playlists-list" : "by-playlist"
     }
 }

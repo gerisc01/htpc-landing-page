@@ -21,6 +21,10 @@ get '/:name/destroy' do
     plugin = YouTube.destroy
 end
 
+get '/:name/openResource' do
+    plugin.send(:openResource, params)
+end
+
 # http.htpc.dev/youtube/get_subs?limit=&page=&token=&count=
 # {"splat"=>[], "captures"=>["youtube", "getChannels"], "name"=>"youtube", "method"=>"getChannels"}
 #{"nextPageToken"=>"CAAQAA", "pageInfo"=>{"totalResults"=>20, "resultsPerPage"=>0}, "items"=>[]}

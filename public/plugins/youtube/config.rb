@@ -47,7 +47,7 @@ class YouTube
 
     def getChannels(params)
         #== Params
-        # *limit*: the limit for the whole page, including back and forward buttons
+        # *limit*: the limit for the amount of tiles that will be on the page
         # token: token used to get the next page
         # count: the total count of the resource
         # page: 1,2,3,4,...
@@ -129,23 +129,106 @@ class YouTube
         return data.to_json
     end
 
-    def getPlaylist(id, limit, offset)
+    def getPlaylist(params)
 
     end
 
-    def getByChannel(id, limit, offset)
+    def getByChannel(params)
+        puts "getByChannel"
+        #== Params
+        # *id*: the id of the channel that you want to return videos from
+        # *limit*: the limit for the amount of tiles that will be on the page
+        # token: token used to get the next page
+        # count: the total count of the resource
+        # page: 1,2,3,4,...
+
+        # Setting up the parameters for the API Call
+        youtube_params = {
+            :part => "snippet",
+            :channelId => params["id"],
+            :fields => "items(id,snippet),nextPageToken,prevPageToken,pageInfo",
+            :maxResults => params["limit"].to_i,
+            :order => "date"
+        }
+        # If a token was included, add it to the params for the API call
+        youtube_params[:pageToken] = params["token"] if !params["token"].to_s.empty?
+        youtube_params[:maxResults] = 0 if params["count"].to_s.empty? # don't return any item info when just returning the count
+
+        # Execute the API call
+        channel = @client.execute!(
+            :api_method => @youtube_discovered_api.search.list,
+            :parameters => youtube_params
+        )
+        # Retrieve the results
+        resp = JSON.parse(channel.response.body)
+        puts resp
+
+        # + If the the total count wasn't passed, find it from the response. 
+        # + Find the ideal pageSize using the getPageSize method. 
+        # + pageSize != limit, reset the limit to pageSize and call the method again
+        if params["count"].to_s.empty?
+            params["count"] = resp["pageInfo"]["totalResults"]
+            params["page"] = "1"
+            pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
+            params["limit"] = pageSize - 1
+            return getByChannel(params)
+        end
+
+        # Find the total amount of pages possible based on count and limit
+        last_page = ((params["count"].to_i - (params["limit"].to_i-1)*2)/(params["limit"].to_i-2)) + 3
+
+        # Configure the data
+        # + If first page, put in data for nextPage tile
+        # + If last page, put in data for prevPage tile
+        # + If middle page, put in data for both tiles
+        data = []
+        if params["page"] != "1"
+            if params["page"].to_i - 1 == 1 && params["page"] != "2"
+                limit = params['limit'].to_i + 1
+            else
+                limit = params['limit']
+            end
+            prev_page = {}
+            prev_page["title"] = "Previous"
+            prev_page["id"] = ""
+            prev_page["icon"] = "/prevPage.gif"
+            prev_page["layout"] = "/youtube/getByChannel?limit=#{limit}&id=#{params["id"]}&count=#{params['count']}&page=#{params['page'].to_i-1}&token=#{resp['prevPageToken']}"
+            data.push(prev_page) 
+        end
+        for sub in resp["items"]
+            sub_data = {}
+            sub_data["title"] = sub["snippet"]["title"]
+            sub_data["id"] = sub["id"]["videoId"]
+            sub_data["icon"] = sub["snippet"]["thumbnails"]["default"]["url"]
+            sub_data["layout"] = ""
+            data.push(sub_data)
+        end
+        if params["page"] != last_page.to_s
+            if params["page"].to_i + 1 == last_page && params["page"] != "1"
+                limit = params['limit'].to_i + 1
+            else
+                limit = params['limit']
+            end
+            next_page = {}
+            next_page["title"] = "Next"
+            next_page["id"] = ""
+            next_page["icon"] = "/nextPage.gif"
+            next_page["layout"] = "/youtube/getByChannel?limit=#{limit}&id=#{params["id"]}&count=#{params['count']}&page=#{params['page'].to_i+1}&token=#{resp['nextPageToken']}" 
+            data.push(next_page)
+        end
+
+        return data.to_json
+    end
+
+    def getByPlaylist(params)
 
     end
 
-    def getByPlaylist(id, limit, offset)
+    def getWatchLater(params)
 
     end
 
-    def getWatchLater(id, limit, offset)
-
-    end
-
-    def getPopular(id, limit, offset)
+    def getPopular(params)
 
     end
 end
