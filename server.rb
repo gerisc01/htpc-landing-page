@@ -13,16 +13,20 @@ get '/' do
 end
 
 get '/:name/init' do
-	require "./public/plugins/#{params["name"]}/config"
-	plugin = YouTube.new
+    require "./public/plugins/#{params["name"]}/config"
+    plugin = YouTube.new
 end
 
 get '/:name/destroy' do
-	plugin = YouTube.destroy
+    plugin = YouTube.destroy
 end
 
-# http.htpc.dev/youtube/get_subs?id=...&limit=...&offset=...
+# http.htpc.dev/youtube/get_subs?limit=&page=&token=&count=
+# {"splat"=>[], "captures"=>["youtube", "getChannels"], "name"=>"youtube", "method"=>"getChannels"}
+#{"nextPageToken"=>"CAAQAA", "pageInfo"=>{"totalResults"=>20, "resultsPerPage"=>0}, "items"=>[]}
 get '/:name/:method' do
     content_type "application/json"
-    return plugin.send(:"#{params['method']}","1","2","3")
+    methodParams = params.select{|params| !["splat", "captures"].include?(params)}
+    puts "Sending to method with params... #{params.inspect}"
+    return plugin.send(:"#{params["method"]}",methodParams)
 end

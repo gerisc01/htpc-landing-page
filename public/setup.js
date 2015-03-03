@@ -1,6 +1,5 @@
-var jsoninput = '{ "tiles" : { "youtube" : { "title" : "YouTube", "id" : "youtube", "icon" : "images/youtube.jpg", "layout" : "home" }, "twitch" : { "title" : "Twitch", "id" : "twitch", "icon" : "images/twitch.jpeg", "layout" : "home" }, "pocketcasts" : { "title" : "PocketCasts", "id" : "pocketcasts", "icon" : "images/pocketcasts.png", "layout" : "home" }, "mlb-at-bat" : { "title" : "MLB At Bat", "id" : "mlb-at-bat", "icon" : "images/mlb-at-bat.png", "layout" : "home" }, "mls-live" : { "title" : "MLS Live", "id" : "mls-live", "icon" : "images/mls-live.png", "layout" : "home" }, "nbc-sports" : { "title" : "NBC Sports", "id" : "nbc-sports", "icon" : "images/nbc-sports.jpg", "layout" : "home" } }, "layouts" : { "home" : ["youtube","twitch","pocketcasts","mlb-at-bat","mls-live","nbc-sports"] } }';
-var youtubeinput = '{ "tiles" : { "subscribers" : { "title" : "Subscriptions", "id": "", "icon": "images/subscriptions.png", "layout": "subscribers" }, "playlists" : { "title" : "Playlists", "id": "", "icon": "images/playlists.png", "layout": "playlists" }, "watchlater" : { "title" : "Watch Later", "id": "", "icon": "images/watchlater.png", "layout": "watchlater" }, "popular" :{ "title" : "Popular", "id": "", "icon": "images/popular.jpg", "layout": "popular" }, "subscribers-list" : "getSubs()", "playlists-list" : "getPlaylists()", "videos-by-channel" : "getVideosByChannel()", "videos-by-playlist" : "getVideosByPlaylist()", "watchlater-videos" : "getWatchLaterVideos()", "popular-videos" : "getPopularVideos()" }, "layouts" : { "home" : ["subscribers","playlists","watchlater","popular"], "subscribers" : "subscribers-list", "playlists" : "playlists-list", "watchlater" : "watchlater-videos", "popular" : "popular-videos", "subscribers-list" : "videos-by-channel", "playlists-list" : "videos-by-playlist" } }';
 var tileCount = 0;
+var maxTilesPerPage = 16;
 var currentPlugin = null;
 var configObj = null;
 
@@ -16,27 +15,35 @@ $(function() {
 
 function getGridConfig(config, layout) {
   var configArray = [];
-  $.getJSON(config, function (json) {
-    var currentLayout = json.layouts[layout];
-    if (typeof currentLayout === 'string') {
-      var tileFunction = json.tiles[currentLayout]
-      var endpoint = "/" + currentPlugin + "/" + tileFunction;
-      resp = $.get(endpoint);
-      configArray = resp.responseJSON
-    } else {
-      for (var i = 0; i < currentLayout.length; i++) {
-        var key = currentLayout[i];
-        configArray.push(json.tiles[key]);
+  // If config is null, the passed layout is a endpoint for the nextPage
+  if (config === null) {
+    console.log("config is equal to null");
+    console.log("next page endpoint is: " + layout);
+    resp = $.get(layout);
+    configArray = resp.responseJSON;
+  } else {
+    $.getJSON(config, function (json) {
+      var currentLayout = json.layouts[layout];
+      if (typeof currentLayout === 'string') {
+        var tileFunction = json.tiles[currentLayout];
+        var endpoint = "/" + currentPlugin + "/" + tileFunction + "?limit=" + maxTilesPerPage;
+        resp = $.get(endpoint);
+        configArray = resp.responseJSON;
+      } else {
+        for (var i = 0; i < currentLayout.length; i++) {
+          var key = currentLayout[i];
+          configArray.push(json.tiles[key]);
+        }
       }
-    }
-  });
+    });
+  }
   return configArray;
 }
 
 function setupGrid(config, layout) {
   // Using the tileMap to easily access information for
   // the tiles after one is selected.
-  tileMap = {}
+  tileMap = {};
   /***************************************************************************
                           CREATE THE MEDIA TILES
   ****************************************************************************/
@@ -55,8 +62,8 @@ function setupGrid(config, layout) {
         imgFile = "plugins/" + plugin.id + "/" + plugin.icon;
         tileClass = "plugintile";
         coloredBackground = '1';
-      } else if (/https?:\/\//.exec(plugin.icon) != null) {
-        imgFile = plugin.icon
+      } else if (/https?:\/\//.exec(plugin.icon) !== null || plugin.icon.indexOf("/") === 0) {
+        imgFile = plugin.icon;
       } else {
         imgFile = "plugins/" + currentPlugin + "/" + plugin.icon;
       }
@@ -145,10 +152,14 @@ function setupGrid(config, layout) {
       }
       var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
       var nextLayout = $(".selected #layout").val();
-      if (tileMap[currentSelected.title] != null) {
+      if (currentSelected.title === "") {
+        re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
+        if (re.exec(nextLayout) !== null) {
+          configLocation = null;
+        }
+      }
+      else {
         addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
-      } else {
-        //var configObj = getNextPage(configLocation, )  
       }
       clearLayout();
       var configObj = getGridConfig(configLocation, nextLayout);
