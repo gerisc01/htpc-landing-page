@@ -145,7 +145,11 @@ function setupGrid(config, layout) {
       }
       var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
       var nextLayout = $(".selected #layout").val();
-      addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
+      if (tileMap[currentSelected.title] != null) {
+        addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
+      } else {
+        //var configObj = getNextPage(configLocation, )  
+      }
       clearLayout();
       var configObj = getGridConfig(configLocation, nextLayout);
       setupGrid(configObj, nextLayout);
