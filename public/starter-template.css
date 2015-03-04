@@ -43,6 +43,8 @@ body, html, .eminem-wraps {
 
 .center-title {
     text-align: center;
+    font-weight: bold;
+    overflow: hidden;
 }
 
 .selected {

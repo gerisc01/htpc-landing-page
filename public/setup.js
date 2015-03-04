@@ -77,7 +77,7 @@ function setupGrid(config, layout) {
       }).appendTo('#'+tileCount);
 
       if (currentPlugin != null) {
-        jQuery('<h2/>', {
+        jQuery('<p/>', {
           class: "center-title",
           text: plugin.title
         }).appendTo('#'+tileCount);
