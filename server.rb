@@ -21,8 +21,10 @@ get '/:name/destroy' do
     plugin = YouTube.destroy
 end
 
-get '/:name/openResource' do
-    plugin.send(:openResource, params)
+get '/:name/getResourceUrl' do
+    content_type "application/json"
+    url = plugin.send(:getResourceUrl, params["id"])
+    return {"url" => url}.to_json
 end
 
 # http.htpc.dev/youtube/get_subs?limit=&page=&token=&count=

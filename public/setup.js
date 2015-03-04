@@ -16,16 +16,15 @@ $(function() {
 function getGridConfig(config, layout, id) {
   var configArray = [];
   // If config is null, the passed layout is a endpoint for the nextPage
+  // If the layout is null, the passed id should be opened in a new page
   if (config === null) {
     resp = $.get(layout);
     configArray = resp.responseJSON;
   } else {
     $.getJSON(config, function (json) {
       var currentLayout = json.layouts[layout];
-      console.log(currentLayout);
       if (typeof currentLayout === 'string') {
         var tileFunction = json.tiles[currentLayout];
-        console.log(tileFunction);
         var endpoint = "/" + currentPlugin + "/" + tileFunction + "?limit=" + maxTilesPerPage;
         if (id !== undefined || id !== "") {
           endpoint += "&id=" + id;
@@ -155,18 +154,21 @@ function setupGrid(config, layout) {
       }
       var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
       var nextLayout = $(".selected #layout").val();
-      if (currentSelected.title === "") {
-        re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
-        if (re.exec(nextLayout) !== null) {
-          configLocation = null;
+      if (nextLayout === "") {
+        openResource(currentSelected.title);
+      } else {
+        if (currentSelected.title === "") {
+          re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
+          if (re.exec(nextLayout) !== null) {
+            configLocation = null;
+          }
+        } else {
+          addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
         }
+        clearLayout();
+        var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
+        setupGrid(configObj, nextLayout);
       }
-      else {
-        addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
-      }
-      clearLayout();
-      var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
-      setupGrid(configObj, nextLayout);
     }
     else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {
         e.preventDefault();
@@ -175,7 +177,6 @@ function setupGrid(config, layout) {
           if ($("ul.nav li").eq(-2).children("#plugin").val() === "") {
             currentPlugin = null;
           }
-
           var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
           clearLayout();
           var configObj = getGridConfig(configLocation, prevLayout);
@@ -239,4 +240,11 @@ function getGridDimensions(tiles) {
       }
     }
   return [parseInt(width), parseInt(height)];
+}
+
+function openResource(id) {
+  var endpoint = "/" + currentPlugin + "/getResourceUrl?id=" + id;
+  resp = $.get(endpoint);
+  url = resp.responseJSON.url;
+  window.open(url, '_blank');
 }

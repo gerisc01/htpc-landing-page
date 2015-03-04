@@ -18,25 +18,25 @@
             "icon": "images/watchlater.png",
             "layout": "watchlater"
         },
-        "popular" :{
-            "title" : "Popular",
-            "id": "popular",
-            "icon": "images/popular.jpg",
-            "layout": "popular"
+        "history" :{
+            "title" : "Watch History",
+            "id": "history",
+            "icon": "images/history.gif",
+            "layout": "history"
         },
         "subscribers-list" : "getChannels",
         "playlists-list" : "getPlaylists",
         "by-channel" : "getByChannel",
         "by-playlist" : "getByPlaylist",
-        "watchlater-videos" : "getWatchLater",
-        "popular-videos" : "getPopular"
+        "by-watchlater" : "getWatchLater",
+        "by-history" : "getHistory"
     },
     "layouts" : {
-        "home" : ["subscribers","playlists","watchlater","popular"],
+        "home" : ["subscribers","playlists","watchlater","history"],
         "subscribers" : "subscribers-list",
         "playlists" : "playlists-list",
-        "watchlater" : "watchlater-videos",
-        "popular" : "popular-videos",
+        "watchlater" : "by-watchlater",
+        "history" : "by-history",
         "subscribers-list" : "by-channel",
         "playlists-list" : "by-playlist"
     }
