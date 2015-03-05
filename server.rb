@@ -14,11 +14,9 @@ end
 
 get '/:name/init' do
     require "./public/plugins/#{params["name"]}/config"
-    plugin = YouTube.new
-end
-
-get '/:name/destroy' do
-    plugin = YouTube.destroy
+    title = config["tiles"][params["name"]]["title"]
+    obj = Object.const_get(title.gsub(" ",""))
+    plugin = obj.new
 end
 
 get '/:name/getResourceUrl' do

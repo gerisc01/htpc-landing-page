@@ -1,43 +1,34 @@
 {
     "tiles" : {
-        "subscribers" : {
-            "title" : "Subscriptions",
-            "id": "subscriptions",
-            "icon": "images/subscriptions.png",
-            "layout": "subscribers"
+        "following" : {
+            "title" : "Following",
+            "id": "following",
+            "icon": "images/twitch.jpeg",
+            "layout": "following"
         },
-        "playlists" : {
-            "title" : "Playlists",
-            "id": "playlists",
-            "icon": "images/playlists.png",
-            "layout": "playlists"
+        "topgames" : {
+            "title" : "Top Games",
+            "id": "topgames",
+            "icon": "images/twitch.jpeg",
+            "layout": "topgames"
         },
-        "watchlater" : {
-            "title" : "Watch Later",
-            "id": "watchlater",
-            "icon": "images/watchlater.png",
-            "layout": "watchlater"
+        "topvideos" : {
+            "title" : "Top Videos",
+            "id": "topvideos",
+            "icon": "images/twitch.jpeg",
+            "layout": "topvideos"
         },
-        "history" :{
-            "title" : "Watch History",
-            "id": "history",
-            "icon": "images/history.gif",
-            "layout": "history"
+        "search" :{
+            "title" : "Search",
+            "id": "search",
+            "icon": "images/twitch.jpeg",
+            "layout": "search"
         },
-        "subscribers-list" : "getChannels",
-        "playlists-list" : "getPlaylists",
-        "by-channel" : "getByChannel",
-        "by-playlist" : "getByPlaylist",
-        "by-watchlater" : "getWatchLater",
-        "by-history" : "getHistory"
+        "channels-followed" : "getFollowing",
+        "playlists-list" : "getPlaylists"
     },
     "layouts" : {
-        "home" : ["subscribers","playlists","watchlater","history"],
-        "subscribers" : "subscribers-list",
-        "playlists" : "playlists-list",
-        "watchlater" : "by-watchlater",
-        "history" : "by-history",
-        "subscribers-list" : "by-channel",
-        "playlists-list" : "by-playlist"
+        "home" : ["following","topgames","topvideos","search"],
+        "following" : "channels-followed"
     }
 }

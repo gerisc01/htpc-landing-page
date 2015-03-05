@@ -36,21 +36,30 @@ class Twitch
     def getFollowing(params)
         #== Params
         # *limit*: the limit for the amount of tiles that will be on the page
+        # offset: the offset so that the results are started at the correct page
         # count: the total count of the resource
         # page: 1,2,3,4,...
-        resp = RestClient.get("https://api.twitch.tv/kraken/users/#{@username}/follows/channels",:authorization => "OAuth #{@access_token}")
+
+        req_params = {}
+        req_params["limit"] = params["limit"]
+        req_params["offset"] = params["offset"]
+
+        resp = RestClient.get("https://api.twitch.tv/kraken/users/#{@username}/follows/channels",:params => req_params, :authorization => "OAuth #{@access_token}")
         json = JSON.parse(resp)
+
+        following = json['follows']
 
         # + If the the total count wasn't passed, find it from the response. 
         # + Find the ideal pageSize using the getPageSize method. 
         # + pageSize != limit, reset the limit to pageSize and call the method again
         if params["count"].to_s.empty?
-            params["count"] = resp["pageInfo"]["totalResults"]
+            params["count"] = json["_total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
             params["limit"] = pageSize - 1
+            params["offset"] = pageSize - 1
             params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
-            return getChannels(params)
+            following.slice(0,params["limit"].to_i)
         end
 
         # Find the total amount of pages possible based on count and limit. Also
@@ -75,16 +84,16 @@ class Twitch
             prev_page["title"] = "Previous"
             prev_page["id"] = ""
             prev_page["icon"] = "/prevPage.gif"
-            prev_page["layout"] = "/twitch/getFollowing?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}&token=#{resp['prevPageToken']}"
-            prev_page["layout"] += "&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            prev_page["layout"] = "/twitch/getFollowing?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}"
+            prev_page["layout"] += "&offset=#{params['offset'].to_i-params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(prev_page) 
         end
-        for sub in resp["items"]
+        for channel in following
             sub_data = {}
-            sub_data["title"] = sub["snippet"]["title"]
-            sub_data["id"] = sub["snippet"]["resourceId"]["channelId"]
-            sub_data["icon"] = sub["snippet"]["thumbnails"]["high"]["url"]
-            sub_data["layout"] = "subscribers-list"
+            sub_data["title"] = channel["channel"]["display_name"]
+            sub_data["id"] = channel["channel"]["name"]
+            sub_data["icon"] = channel["channel"]["logo"]
+            sub_data["layout"] = "channels-followed"
             data.push(sub_data)
         end
         if params["page"] != last_page.to_s
@@ -99,8 +108,8 @@ class Twitch
             next_page["title"] = "Next"
             next_page["id"] = ""
             next_page["icon"] = "/nextPage.gif"
-            next_page["layout"] = "/twitch/getFollowing?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}&token=#{resp['nextPageToken']}" 
-            next_page["layout"] += "&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            next_page["layout"] = "/twitch/getFollowing?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}" 
+            next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(next_page)
         end
 
