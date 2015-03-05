@@ -58,7 +58,7 @@ class YouTube
         page = 1
         while (currentCount > 0)
             lostTiles = (page == 1 || currentCount < pageSize - 1) ? 1 : 2
-            if (currentCount - (pageSize-lostTiles)) < 0
+            if (currentCount - (pageSize-lostTiles)) <= 0
                 finalPageSize = currentCount + 1
                 if finalPageSize <  5
                     newPageCount = idealPageCounts[idealPageCounts.index(pageSize)-1]
@@ -374,6 +374,8 @@ class YouTube
         # Retrieve the results
         resp = JSON.parse(channel.response.body)
 
+        puts resp
+
         # + If the the total count wasn't passed, find it from the response. 
         # + Find the ideal pageSize using the getPageSize method. 
         # + pageSize != limit, reset the limit to pageSize and call the method again
@@ -386,8 +388,6 @@ class YouTube
             params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             return getByPlaylist(params)
         end
-
-        puts resp
 
         last_page = params["last_page"].to_i
 
@@ -416,7 +416,7 @@ class YouTube
             sub_data = {}
             sub_data["title"] = sub["snippet"]["title"]
             sub_data["id"] = sub["snippet"]["resourceId"]["videoId"]
-            sub_data["icon"] = sub["snippet"]["thumbnails"]["high"]["url"]
+            sub_data["icon"] = sub["snippet"]["thumbnails"] != nil ? sub["snippet"]["thumbnails"]["high"]["url"] : "/plugins/youtube/images/no-video.jpg"
             sub_data["layout"] = ""
             data.push(sub_data)
         end
