@@ -18,17 +18,24 @@
             "icon": "images/twitch.jpeg",
             "layout": "topvideos"
         },
-        "search" :{
-            "title" : "Search",
-            "id": "search",
+        "topstreams" :{
+            "title" : "Top Streams",
+            "id": "topstreams",
             "icon": "images/twitch.jpeg",
-            "layout": "search"
+            "layout": "topstreams"
         },
         "channels-followed" : "getFollowing",
-        "playlists-list" : "getPlaylists"
+        "channel-videos" : "getChannelVideos",
+        "games-list" : "getTopGames",
+        "videos-list" : "getTopVideos",
+        "streams-list" : "getTopStreams"
     },
     "layouts" : {
-        "home" : ["following","topgames","topvideos","search"],
-        "following" : "channels-followed"
+        "home" : ["following","topgames","topvideos","topstreams"],
+        "following" : "channels-followed",
+        "channels-followed" : "channel-videos",
+        "topgames" : "games-list",
+        "topvideos" : "videos-list",
+        "topstreams" : "streams-list"
     }
 }
