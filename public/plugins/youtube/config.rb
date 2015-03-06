@@ -7,10 +7,6 @@ class YouTube
         @client = auth()
         @youtube_discovered_api = @client.discovered_api("youtube", "v3")
         findStandardPlaylistIds
-        puts "WatchLater:"
-        puts @watchlater
-        puts "WatchHistory"
-        puts @watchhistory
     end
 
     def auth()
@@ -41,7 +37,6 @@ class YouTube
         )
         # Retrieve the results
         resp = JSON.parse(channel.response.body)
-        puts resp
         @watchlater = resp["items"][0]["contentDetails"]["relatedPlaylists"]["watchLater"]
         @watchhistory = resp["items"][0]["contentDetails"]["relatedPlaylists"]["watchHistory"]
         @likes = resp["items"][0]["contentDetails"]["relatedPlaylists"]["likes"]
@@ -334,7 +329,6 @@ class YouTube
             else
                 limit = params['limit']
             end
-            puts limit
             next_page = {}
             next_page["title"] = "Next"
             next_page["id"] = ""
@@ -373,8 +367,6 @@ class YouTube
         )
         # Retrieve the results
         resp = JSON.parse(channel.response.body)
-
-        puts resp
 
         # + If the the total count wasn't passed, find it from the response. 
         # + Find the ideal pageSize using the getPageSize method. 
@@ -428,7 +420,6 @@ class YouTube
             else
                 limit = params['limit']
             end
-            puts limit
             next_page = {}
             next_page["title"] = "Next"
             next_page["id"] = ""
@@ -453,7 +444,6 @@ class YouTube
         #== Params
         # *id*: the id of the channel that you want to return videos from
         # *limit*: the limit for the amount of tiles that will be on the page
-        puts @watchhistory
         params["id"] = @watchhistory
         return getByPlaylist(params)
     end

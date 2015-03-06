@@ -27,6 +27,7 @@
         "channels-followed" : "getFollowing",
         "channel-videos" : "getChannelVideos",
         "games-list" : "getTopGames",
+        "by-game" : "getByGame",
         "videos-list" : "getTopVideos",
         "streams-list" : "getTopStreams"
     },
@@ -35,6 +36,7 @@
         "following" : "channels-followed",
         "channels-followed" : "channel-videos",
         "topgames" : "games-list",
+        "games-list" : "by-game",
         "topvideos" : "videos-list",
         "topstreams" : "streams-list"
     }
