@@ -1,0 +1,43 @@
+{
+    "tiles" : {
+        "artists" : {
+            "title" : "Artists",
+            "id": "artists",
+            "icon": "images/artists.jpg",
+            "layout": "artists"
+        },
+        "playlists" : {
+            "title" : "My Playlists",
+            "id": "playlists",
+            "icon": "images/playlists.svg",
+            "layout": "playlists"
+        },
+        "albums" : {
+            "title" : "Albums",
+            "id": "watchlater",
+            "icon": "images/albums.jpg",
+            "layout": "albums"
+        },
+        "browse" :{
+            "title" : "Browse",
+            "id": "browse",
+            "icon": "images/browse.jpg",
+            "layout": "browse"
+        },
+        "subscribers-list" : "getChannels",
+        "playlists-list" : "getMyPlaylists",
+        "by-channel" : "getByChannel",
+        "by-playlist" : "getByPlaylist",
+        "by-watchlater" : "getWatchLater",
+        "by-history" : "getHistory"
+    },
+    "layouts" : {
+        "home" : ["artists","playlists","albums","browse"],
+        "subscribers" : "subscribers-list",
+        "playlists" : "playlists-list",
+        "watchlater" : "by-watchlater",
+        "history" : "by-history",
+        "subscribers-list" : "by-channel",
+        "playlists-list" : "by-playlist"
+    }
+}

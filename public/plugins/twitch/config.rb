@@ -76,7 +76,7 @@ class Twitch
         if params["page"] != "1"
             if params["page"].to_i - 1 == 1 && params["last_page"] != "2"
                 limit = params['limit'].to_i + 1
-            elsif params["page"].to_i == params["last_page"]
+            elsif params["page"] == params["last_page"]
                 limit = params['limit'].to_i - 1
             else
                 limit = params['limit']
@@ -86,7 +86,7 @@ class Twitch
             prev_page["id"] = ""
             prev_page["icon"] = "/prevPage.gif"
             prev_page["layout"] = "/twitch/getFollowing?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}"
-            prev_page["layout"] += "&offset=#{params['offset'].to_i-params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            prev_page["layout"] += "&offset=#{params['offset'].to_i-limit}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(prev_page) 
         end
         for channel in following
@@ -475,10 +475,8 @@ class Twitch
         # + pageSize != limit, reset the limit to pageSize and call the method again
         if params["count"].to_s.empty?
             params["count"] = json["_total"]
-            puts params["count"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            puts pageSize.inspect
             params["limit"] = pageSize - 1
             params["offset"] = 0
             params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;

@@ -18,10 +18,10 @@
             "icon" : "images/pocketcasts.png",
             "layout" : "home"
         },
-        "mlb-at-bat" : {
-            "title" : "MLB At Bat",
-            "id" : "mlb-at-bat",
-            "icon" : "images/mlb-at-bat.png",
+        "spotify" : {
+            "title" : "Spotify",
+            "id" : "spotify",
+            "icon" : "images/spotify.png",
             "layout" : "home"
         },
         "mls-live" : {
@@ -38,6 +38,6 @@
         }
     },
     "layouts" : {
-        "home" : ["youtube","twitch","pocketcasts","mlb-at-bat","mls-live","nbc-sports"]
+        "home" : ["youtube","twitch","pocketcasts","spotify","mls-live","nbc-sports"]
     }
 }
