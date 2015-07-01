@@ -13,6 +13,10 @@ class Twitch
 
     end
 
+    def destroy()
+
+    end
+
     # Currently works on every number up to 172
     def getPageSize(count, pageSize)
         idealPageCounts = [6,8,9,12,15,16]

@@ -2,6 +2,7 @@ class Spotify
     def initialize()
         require 'restclient'
         require 'base64'
+        require 'json'
         @user_id = "scott.gerike"
         @client_id = "6a4ec190bc1b405099a8256f17c456d1"
         @client_secret = "e9f5adc49029473f93add702787b676f"
@@ -9,7 +10,67 @@ class Spotify
         if defined? @token_expire != nil && Time.now > @token_expire
             @access_token = auth()
         end
-        startListening()
+
+        begin
+            #startMopidy()
+            #puts @mopidy_pid
+            #sleep(2)
+            startListening()
+        rescue Exception => e
+            raise e
+        end
+    end
+
+    def auth()
+        # Initialize the Authorization resource
+        resource = RestClient::Resource.new("https://accounts.spotify.com", :user => @client_id, :password => @client_secret)
+        begin
+            resp = resource["api/token"].post "grant_type=refresh_token&refresh_token=" + @refresh_token
+        rescue RestClient::Exception => ex
+            puts ex.inspect
+        end
+        jsonResp = JSON.parse(resp)
+        @access_token = jsonResp['access_token']
+        @token_expire = Time.now + jsonResp['expires_in'].to_i
+
+        return @access_token
+    end
+
+    def destroy(params)
+        if defined? @mopidy_pid
+            endMopidy()
+        end
+    end
+
+    # Currently works on every number up to 172
+    def getPageSize(count, pageSize)
+        idealPageCounts = [6,8,9,12,15,16]
+        currentCount = count
+        page = 1
+        while (currentCount > 0)
+            lostTiles = (page == 1 || currentCount < pageSize - 1) ? 1 : 2
+            if (currentCount - (pageSize-lostTiles)) <= 0 || count > 500
+                finalPageSize = currentCount + 1
+                if finalPageSize <  5
+                    newPageCount = idealPageCounts[idealPageCounts.index(pageSize)-1]
+                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE" if newPageCount > pageSize
+                    return getPageSize(count, newPageCount)
+                end
+                return pageSize
+            end
+            currentCount -= (pageSize - lostTiles)
+            page += 1
+        end
+    end
+
+    def startMopidy()
+        @mopidy_pid = fork do
+            exec "mopidy"
+        end
+    end
+
+    def endMopidy()
+        Process.kill "TERM", @mopidy_pid
     end
 
     def startListening()
@@ -32,42 +93,6 @@ class Spotify
 
         ws.on :error do |e|
           p e
-        end
-    end
-
-    def auth()
-        # Initialize the Authorization resource
-        resource = RestClient::Resource.new("https://accounts.spotify.com", :user => @client_id, :password => @client_secret)
-        begin
-            resp = resource["api/token"].post "grant_type=refresh_token&refresh_token=" + @refresh_token
-        rescue RestClient::Exception => ex
-            puts ex.inspect
-        end
-        jsonResp = JSON.parse(resp)
-        @access_token = jsonResp['access_token']
-        @token_expire = Time.now + jsonResp['expires_in'].to_i
-
-        return @access_token
-    end
-
-    # Currently works on every number up to 172
-    def getPageSize(count, pageSize)
-        idealPageCounts = [6,8,9,12,15,16]
-        currentCount = count
-        page = 1
-        while (currentCount > 0)
-            lostTiles = (page == 1 || currentCount < pageSize - 1) ? 1 : 2
-            if (currentCount - (pageSize-lostTiles)) <= 0 || count > 500
-                finalPageSize = currentCount + 1
-                if finalPageSize <  5
-                    newPageCount = idealPageCounts[idealPageCounts.index(pageSize)-1]
-                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE" if newPageCount > pageSize
-                    return getPageSize(count, newPageCount)
-                end
-                return pageSize
-            end
-            currentCount -= (pageSize - lostTiles)
-            page += 1
         end
     end
 
@@ -161,6 +186,137 @@ class Spotify
             next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(next_page)
         end
+
+        return data.to_json
+    end
+
+    def getByPlaylist(params)
+        #== Params
+        # *id*: the id of the playlist that tracks will come from
+        # *limit*: the limit for the amount of tiles that will be on the page
+        # offset: the offset so that the results are started at the correct page
+        # count: the total count of the resource
+        # page: 1,2,3,4,...
+
+        req_params = {}
+        req_params["limit"] = params["limit"]
+        req_params["offset"] = params["offset"] if params["offset"] != nil
+
+        rpcJSON = {"jsonrpc" => "2.0", "id" => 1, "method" => "core.playlists.lookup", "params" => [params["id"]]}
+
+        begin
+            resp = RestClient.post("http://localhost:6680/mopidy/rpc",rpcJSON.to_json)
+        rescue RestClient::Exception => ex
+            puts ex.inspect
+        end
+
+        json = JSON.parse(resp)
+        songs = json["result"]["tracks"]
+
+        ########################################################################
+        # Always returns everything, so limit and offset are handled differenty
+        # Will always slice the item list down to the proper size before doing
+        # future exploration calls
+        ########################################################################
+        if !params["count"].to_s.empty?
+            songs = songs.slice(params["offset"].to_i,params["limit"].to_i)
+        end
+
+        # + If the the total count wasn't passed, find it from the response. 
+        # + Find the ideal pageSize using the getPageSize method. 
+        # + pageSize != limit, reset the limit to pageSize and call the method again
+        if params["count"].to_s.empty?
+            params["count"] = songs.size
+            params["page"] = "1"
+            pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
+            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            params["offset"] = 0
+            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
+            songs = songs.slice(0,params["limit"].to_i)
+        end
+
+        # Find the total amount of pages possible based on count and limit. Also
+        # caulculate offset
+        last_page = params["last_page"].to_i
+        offset = (params["limit"].to_i * (params["page"].to_i - 1)) + (1 * ((params["page"].to_i-1)/1000)).ceil
+
+        # Configure the data
+        # + If first page, put in data for nextPage tile
+        # + If last page, put in data for prevPage tile
+        # + If middle page, put in data for both tiles
+        data = []
+        if params["page"] != "1"
+            if params["page"].to_i - 1 == 1 && params["last_page"] != "2"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == params["last_page"]
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit']
+            end
+            prev_page = {}
+            prev_page["title"] = "Previous"
+            prev_page["id"] = ""
+            prev_page["icon"] = "/prevPage.gif"
+            prev_page["layout"] = "/spotify/getByPlaylist?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}"
+            prev_page["layout"] += "&offset=#{params['offset'].to_i-limit}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(prev_page) 
+        end
+
+        # Build up ids to call mopidy for spotify album art for each song
+        id_array = []
+        for song in songs
+            sub_data = {}
+            sub_data["title"] = song["name"]
+            sub_data["id"] = song["uri"]
+            id_array.push(song["uri"])
+            sub_data["layout"] = ""
+            data.push(sub_data)
+        end
+
+        # getImagesJSON
+        imagesJSON = {"jsonrpc" => "2.0", "id" => 1, "method" => "core.library.get_images", "params" => [id_array]}
+        begin
+            resp = RestClient.post("http://localhost:6680/mopidy/rpc",imagesJSON.to_json)
+        rescue RestClient::Exception => ex
+            puts ex.inspect
+        end
+        puts resp
+        imgResp = JSON.parse(resp)
+
+        for i in 0...data.size
+            sub_data = data[i]
+            puts imgResp["result"].inspect
+            if sub_data["id"] != ""
+                images = imgResp["result"][sub_data["id"]]
+                if images.length == 1
+                    sub_data["icon"] = images[0]["url"]
+                elsif images.length == 0
+                    sub_data["icon"] = ""
+                else
+                    sub_data["icon"] = images[1]["url"]
+                end
+            end
+            data[i] = sub_data
+        end
+
+        if params["page"] != last_page.to_s
+            if params["page"].to_i + 1 == last_page && params["page"] != "1"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == "1"
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit']
+            end
+            next_page = {}
+            next_page["title"] = "Next"
+            next_page["id"] = ""
+            next_page["icon"] = "/nextPage.gif"
+            next_page["layout"] = "/spotify/getByPlaylist?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}" 
+            next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(next_page)
+        end
+
+        puts data.inspect
 
         return data.to_json
     end

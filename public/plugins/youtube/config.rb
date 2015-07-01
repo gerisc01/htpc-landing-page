@@ -23,6 +23,10 @@ class YouTube
         return client
     end
 
+    def destroy()
+
+    end
+
     def findStandardPlaylistIds()
         youtube_params = {
             :part => "contentDetails",
