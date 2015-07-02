@@ -24,20 +24,53 @@
             "icon": "images/browse.jpg",
             "layout": "browse"
         },
-        "subscribers-list" : "getChannels",
+        "featured-playlists" : {
+            "title" : "Featured Playlists",
+            "id" : "featured-playlists",
+            "icon" : "images/browse.jpg",
+            "layout" : "featured-playlists"
+        },
+        "new-releases" : {
+            "title" : "New Releases",
+            "id" : "new-releases",
+            "icon" : "images/browse.jpg",
+            "layout" : "new-releases"
+        },
+        "categories" : {
+            "title" : "Categories",
+            "id" : "categories",
+            "icon" : "images/browse.jpg",
+            "layout" : "categories"
+        },
+        "top-charts" : {
+            "title" : "Top Charts",
+            "id" : "top-charts",
+            "icon" : "images/browse.jpg",
+            "layout" : "top-charts"
+        },
         "playlists-list" : "getMyPlaylists",
-        "by-channel" : "getByChannel",
-        "by-playlist" : "getByPlaylist",
+        "tracks" : "getTracks",
+        "featured-list" : "getFeaturedPlaylists",
+        "by-category" : "getCategories",
+        "category-playlists" : "getByCategory", 
         "by-watchlater" : "getWatchLater",
-        "by-history" : "getHistory"
+        "by-history" : "getHistory",
+        "subscribers-list" : "getChannels",
+        "by-channel" : "getByChannel"
     },
     "layouts" : {
         "home" : ["artists","playlists","albums","browse"],
-        "subscribers" : "subscribers-list",
+        "browse" : ["featured-playlists","categories","top-charts","new-releases"],
+        "featured-playlists" : "featured-list",
+        "categories" : "by-category",
+        "by-category" : "category-playlists",
+        "category-playlists" : "tracks",
         "playlists" : "playlists-list",
+        "playlists-list" : "tracks",
+        "featured-list" : "tracks",
+        "subscribers" : "subscribers-list",
         "watchlater" : "by-watchlater",
         "history" : "by-history",
-        "subscribers-list" : "by-channel",
-        "playlists-list" : "by-playlist"
+        "subscribers-list" : "by-channel"
     }
 }
