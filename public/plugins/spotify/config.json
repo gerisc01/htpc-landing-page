@@ -12,11 +12,11 @@
             "icon": "images/playlists.svg",
             "layout": "playlists"
         },
-        "albums" : {
-            "title" : "Albums",
-            "id": "watchlater",
+        "my-tracks" : {
+            "title" : "My Tracks",
+            "id": "my-tracks",
             "icon": "images/albums.jpg",
-            "layout": "albums"
+            "layout": "my-tracks"
         },
         "browse" :{
             "title" : "Browse",
@@ -52,21 +52,28 @@
         "tracks" : "getTracks",
         "featured-list" : "getFeaturedPlaylists",
         "by-category" : "getCategories",
-        "category-playlists" : "getByCategory", 
+        "by-new-release" : "getNewReleases",
+        "category-playlists" : "getByCategory",
         "by-watchlater" : "getWatchLater",
         "by-history" : "getHistory",
         "subscribers-list" : "getChannels",
-        "by-channel" : "getByChannel"
+        "by-channel" : "getByChannel",
+        "by-top-chart" : "getTopCharts",
+        "get-my-tracks" : "getMyTracks"
     },
     "layouts" : {
-        "home" : ["artists","playlists","albums","browse"],
+        "home" : ["artists","playlists","my-tracks","browse"],
         "browse" : ["featured-playlists","categories","top-charts","new-releases"],
         "featured-playlists" : "featured-list",
+        "my-tracks" : "get-my-tracks",
+        "top-charts" : "by-top-chart",
         "categories" : "by-category",
         "by-category" : "category-playlists",
         "category-playlists" : "tracks",
         "playlists" : "playlists-list",
         "playlists-list" : "tracks",
+        "new-releases" : "by-new-release",
+        "by-new-release" : "tracks",
         "featured-list" : "tracks",
         "subscribers" : "subscribers-list",
         "watchlater" : "by-watchlater",
