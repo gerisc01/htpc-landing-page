@@ -163,7 +163,7 @@ function setupGrid(config, layout) {
             configLocation = null;
           }
         } else {
-          addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout);
+          addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout, currentSelected.title);
         }
         clearLayout();
         var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
@@ -174,12 +174,13 @@ function setupGrid(config, layout) {
         e.preventDefault();
         if ($("ul.nav li").size() > 1) {
           var prevLayout = $("ul.nav li").eq(-2).children("#layout").val();
+          var id = $("ul.nav li").eq(-2).children("#id").val();
           if ($("ul.nav li").eq(-2).children("#plugin").val() === "") {
             currentPlugin = null;
           }
           var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
           clearLayout();
-          var configObj = getGridConfig(configLocation, prevLayout);
+          var configObj = getGridConfig(configLocation, prevLayout, id);
           setupGrid(configObj, prevLayout);
           $("ul.nav li").eq(-1).remove();
           $("ul.nav li").eq(-1).addClass("active");
@@ -194,7 +195,7 @@ function clearLayout() {
   $("body").off("keydown");
 }
 
-function addToNavbar(title, plugin, layout) {
+function addToNavbar(title, plugin, layout, id) {
   $("ul.nav li").eq(-1).removeClass("active");
   
   jQuery("<li/>", {
@@ -216,6 +217,12 @@ function addToNavbar(title, plugin, layout) {
     id: "layout",
     type: "hidden",
     value: layout
+  }).appendTo("ul.nav li.active");
+
+  jQuery("<input/>", {
+    id: "id",
+    type: "hidden",
+    value: id
   }).appendTo("ul.nav li.active");
 }
 

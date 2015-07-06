@@ -18,7 +18,7 @@ class Spotify
             #sleep(2)
             startListening()
         rescue Exception => e
-            raise e
+            # raise e
         end
     end
 
@@ -203,37 +203,28 @@ class Spotify
         req_params["limit"] = params["limit"]
         req_params["offset"] = params["offset"] if params["offset"] != nil
 
-        rpcJSON = {"jsonrpc" => "2.0", "id" => 1, "method" => "core.library.browse", "params" => [params["id"]]}
-
-        begin
-            resp = RestClient.post("http://localhost:6680/mopidy/rpc",rpcJSON.to_json)
-        rescue RestClient::Exception => ex
-            puts ex.inspect
+        if match = params["id"].match(/spotify:user:(.*?):playlist:(.*?)\z/i)
+            user, id = match.captures
+            begin
+                resp = RestClient.get("https://api.spotify.com/v1/users/#{user}/playlists/#{id}/tracks", :params => req_params, :authorization => "Bearer #{@access_token}")
+            rescue RestClient::Exception => ex
+                puts ex.inspect
+            end
         end
-
         json = JSON.parse(resp)
-        songs = json["result"]
-
-        ########################################################################
-        # Always returns everything, so limit and offset are handled differenty
-        # Will always slice the item list down to the proper size before doing
-        # future exploration calls
-        ########################################################################
-        if !params["count"].to_s.empty?
-            songs = songs.slice(params["offset"].to_i,params["limit"].to_i)
-        end
+        items = json["items"]
 
         # + If the the total count wasn't passed, find it from the response. 
         # + Find the ideal pageSize using the getPageSize method. 
         # + pageSize != limit, reset the limit to pageSize and call the method again
         if params["count"].to_s.empty?
-            params["count"] = songs.size
+            params["count"] = json["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
             params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
             params["offset"] = 0
             params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
-            songs = songs.slice(0,params["limit"].to_i)
+            items = items.slice(0,params["limit"].to_i)
         end
 
         puts params.inspect
@@ -260,18 +251,27 @@ class Spotify
             prev_page["title"] = "Previous"
             prev_page["id"] = ""
             prev_page["icon"] = "/prevPage.gif"
-            prev_page["layout"] = "/spotify/getByPlaylist?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}&id=#{params['id']}"
+            prev_page["layout"] = "/spotify/getTracks?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}&id=#{params['id']}"
             prev_page["layout"] += "&offset=#{params['offset'].to_i-limit}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(prev_page)
         end
 
-        # Build up ids to call mopidy for spotify album art for each song
-        id_array = []
-        for song in songs
+        # # Build up ids to call mopidy for spotify album art for each song
+        # id_array = []
+        for item in items
+            song = item["track"]
+            images = song["album"]["images"]
             sub_data = {}
             sub_data["title"] = song["name"]
             sub_data["id"] = song["uri"]
-            id_array.push(song["uri"])
+            if images.length == 1
+                sub_data["icon"] = images[0]["url"]
+            elsif images.length == 0
+                sub_data["icon"] = ""
+            else
+                sub_data["icon"] = images[1]["url"]
+            end
+            # id_array.push(song["uri"])
             sub_data["layout"] = ""
             data.push(sub_data)
         end
@@ -288,36 +288,36 @@ class Spotify
         # imgHash = imgResp["result"]
 
 
-        # Temp solution
-        for i in 0...id_array.size
-            id_array[i] = id_array[i].split(":")[2]
-        end
-        begin
-            resp = RestClient.get("https://api.spotify.com/v1/tracks/?ids=#{id_array.join(',')}", :authorization => "Bearer #{@access_token}")
-        rescue RestClient::Exception => ex
-            puts ex.inspect
-        end
-        json = JSON.parse(resp)
-        tracks = json["tracks"]
-        imgHash = {}
-        for track in tracks
-            imgHash[track["uri"]] = track["album"]["images"]
-        end
+        # # Temp solution
+        # for i in 0...id_array.size
+        #     id_array[i] = id_array[i].split(":")[2]
+        # end
+        # begin
+        #     resp = RestClient.get("https://api.spotify.com/v1/tracks/?ids=#{id_array.join(',')}", :authorization => "Bearer #{@access_token}")
+        # rescue RestClient::Exception => ex
+        #     puts ex.inspect
+        # end
+        # json = JSON.parse(resp)
+        # tracks = json["tracks"]
+        # imgHash = {}
+        # for track in tracks
+        #     imgHash[track["uri"]] = track["album"]["images"]
+        # end
 
-        for i in 0...data.size
-            sub_data = data[i]
-            if sub_data["id"] != ""
-                images = imgHash[sub_data["id"]]
-                if images.length == 1
-                    sub_data["icon"] = images[0]["url"]
-                elsif images.length == 0
-                    sub_data["icon"] = ""
-                else
-                    sub_data["icon"] = images[1]["url"]
-                end
-            end
-            data[i] = sub_data
-        end
+        # for i in 0...data.size
+        #     sub_data = data[i]
+        #     if sub_data["id"] != ""
+        #         images = imgHash[sub_data["id"]]
+        #         if images.length == 1
+        #             sub_data["icon"] = images[0]["url"]
+        #         elsif images.length == 0
+        #             sub_data["icon"] = ""
+        #         else
+        #             sub_data["icon"] = images[1]["url"]
+        #         end
+        #     end
+        #     data[i] = sub_data
+        # end
 
         if params["page"] != last_page.to_s
             if params["page"].to_i + 1 == last_page && params["page"] != "1"
@@ -331,7 +331,7 @@ class Spotify
             next_page["title"] = "Next"
             next_page["id"] = ""
             next_page["icon"] = "/nextPage.gif"
-            next_page["layout"] = "/spotify/getByPlaylist?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}&id=#{params['id']}" 
+            next_page["layout"] = "/spotify/getTracks?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}&id=#{params['id']}" 
             next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
             data.push(next_page)
         end
