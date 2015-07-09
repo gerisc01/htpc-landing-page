@@ -7,6 +7,7 @@ class Spotify
         @client_id = "6a4ec190bc1b405099a8256f17c456d1"
         @client_secret = "e9f5adc49029473f93add702787b676f"
         @refresh_token = "AQCrqtaGwPNV2OM1had6fR6ezjBnxXAbasFDFvVX6xAtuV53YJ777KLENEoGA4gAe_Mu2O_XSdKQEuIUHDXU9BRfryuIXEhvidcULZC2xrR1c27WiWkEF6LShTzie2NJFEw"
+        @artists = File.read("/Users/sgerike/Sites/htpc-landing-page/public/plugins/spotify/artists.txt").split("\n")
         if defined? @token_expire != nil && Time.now > @token_expire
             @access_token = auth()
             puts @access_token
@@ -798,16 +799,200 @@ class Spotify
         return data.to_json
     end
 
+    def getArtists(params)
+        # + If the the total count wasn't passed, find it from the response. 
+        # + Find the ideal pageSize using the getPageSize method. 
+        # + pageSize != limit, reset the limit to pageSize and call the method again
+        if params["count"].to_s.empty?
+            params["count"] = @artists.size
+            params["page"] = "1"
+            pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
+            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            params["offset"] = 0
+            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
+            # items = items.slice(0,params["limit"].to_i)
+        end
+
+        # Find the total amount of pages possible based on count and limit. Also
+        # caulculate offset
+        last_page = params["last_page"].to_i
+        offset = (params["limit"].to_i * (params["page"].to_i - 1)) + (1 * ((params["page"].to_i-1)/1000)).ceil
+
+        artist_split = @artists.slice(params["offset"].to_i,params["limit"].to_i)
+        artist_ids = []
+        for artist in artist_split
+            artist_ids.push(artist.split("::")[1])
+        end
+
+        req_params = {}
+        req_params["ids"] = artist_ids.join(",")
+
+        begin
+            resp = RestClient.get("https://api.spotify.com/v1/artists",:params => req_params, :authorization => "Bearer #{@access_token}")
+        rescue RestClient::Exception => ex
+            puts ex.inspect
+        end
+        json = JSON.parse(resp)
+        artists = json["artists"]
+
+        # Configure the data
+        # + If first page, put in data for nextPage tile
+        # + If last page, put in data for prevPage tile
+        # + If middle page, put in data for both tiles
+        data = []
+        if params["page"] != "1"
+            if params["page"].to_i - 1 == 1 && params["last_page"] != "2"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == params["last_page"] && params["page"] != 2
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit'].to_i
+            end
+            prev_page = {}
+            prev_page["title"] = "Previous"
+            prev_page["id"] = ""
+            prev_page["icon"] = "/prevPage.gif"
+            prev_page["layout"] = "/spotify/getArtists?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}"
+            prev_page["layout"] += "&offset=#{params['offset'].to_i-limit}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(prev_page) 
+        end
+        for artist in artists
+            sub_data = {}
+            sub_data["title"] = artist["name"]
+            sub_data["id"] = artist["uri"]
+            sub_data["layout"] = "get-artists"
+            #get proper image url
+            images = artist["images"]
+            if images.length == 1
+                sub_data["icon"] = images[0]["url"]
+            elsif images.length == 0
+                sub_data["icon"] = ""
+            else
+                sub_data["icon"] = images[1]["url"]
+            end
+            data.push(sub_data)
+        end
+        if params["page"] != last_page.to_s
+            if params["page"].to_i + 1 == last_page && params["page"] != "1"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == "1"
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit']
+            end
+            next_page = {}
+            next_page["title"] = "Next"
+            next_page["id"] = ""
+            next_page["icon"] = "/nextPage.gif"
+            next_page["layout"] = "/spotify/getArtists?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}"
+            next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(next_page)
+        end
+
+        return data.to_json
+    end
+
+    def getArtistAlbums(params)
+        #== Params
+        # *id*: the id for the category that was selected
+        # *limit*: the limit for the amount of tiles that will be on the page
+        # offset: the offset so that the results are started at the correct page
+        # count: the total count of the resource
+        # page: 1,2,3,4,...
+
+        req_params = {}
+        req_params["limit"] = params["limit"]
+        req_params["offset"] = params["offset"] if params["offset"] != nil
+        req_params["album_type"] = "album,single"
+        req_params["market"] = "US"
+
+        uri = params["id"]
+        id = uri.split(":")[2]
+        begin
+            resp = RestClient.get("https://api.spotify.com/v1/artists/#{id}/albums",:params => req_params, :authorization => "Bearer #{@access_token}")
+        rescue RestClient::Exception => ex
+            puts ex.inspect
+        end
+        json = JSON.parse(resp)
+        albums = json["items"]
+
+        # + If the the total count wasn't passed, find it from the response. 
+        # + Find the ideal pageSize using the getPageSize method. 
+        # + pageSize != limit, reset the limit to pageSize and call the method again
+        if params["count"].to_s.empty?
+            params["count"] = json["total"]
+            params["page"] = "1"
+            pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
+            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            params["offset"] = 0
+            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
+            albums = albums.slice(0,params["limit"].to_i)
+        end
+
+        # Find the total amount of pages possible based on count and limit. Also
+        # caulculate offset
+        last_page = params["last_page"].to_i
+        offset = (params["limit"].to_i * (params["page"].to_i - 1)) + (1 * ((params["page"].to_i-1)/1000)).ceil
+
+        # Configure the data
+        # + If first page, put in data for nextPage tile
+        # + If last page, put in data for prevPage tile
+        # + If middle page, put in data for both tiles
+        data = []
+        if params["page"] != "1"
+            if params["page"].to_i - 1 == 1 && params["last_page"] != "2"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == params["last_page"] && params["page"] != 2
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit'].to_i
+            end
+            prev_page = {}
+            prev_page["title"] = "Previous"
+            prev_page["id"] = ""
+            prev_page["icon"] = "/prevPage.gif"
+            prev_page["layout"] = "/spotify/getArtistAlbums?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i-1}"
+            prev_page["layout"] += "&offset=#{params['offset'].to_i-limit}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(prev_page) 
+        end
+        for album in albums
+            sub_data = {}
+            sub_data["title"] = album["name"]
+            sub_data["id"] = album["uri"]
+            sub_data["layout"] = "get-artist-albums"
+            #get proper image url
+            images = album["images"]
+            if images.length == 1
+                sub_data["icon"] = images[0]["url"]
+            elsif images.length == 0
+                sub_data["icon"] = ""
+            else
+                sub_data["icon"] = images[1]["url"]
+            end
+            data.push(sub_data)
+        end
+        if params["page"] != last_page.to_s
+            if params["page"].to_i + 1 == last_page && params["page"] != "1"
+                limit = params['limit'].to_i + 1
+            elsif params["page"] == "1"
+                limit = params['limit'].to_i - 1
+            else
+                limit = params['limit']
+            end
+            next_page = {}
+            next_page["title"] = "Next"
+            next_page["id"] = ""
+            next_page["icon"] = "/nextPage.gif"
+            next_page["layout"] = "/spotify/getArtistAlbums?limit=#{limit}&count=#{params['count']}&page=#{params['page'].to_i+1}"
+            next_page["layout"] += "&offset=#{params['offset'].to_i+params['limit'].to_i}&last_page=#{last_page}" # adding in the last_page variable as a temporary solution
+            data.push(next_page)
+        end
+
+        return data.to_json
+    end
+
     def getTopCharts(params)
         params["id"] = "toplists"
         getByCategory(params)
-    end
-
-    def getArtists()
-
-    end
-
-    def getAlbums()
-
     end
 end

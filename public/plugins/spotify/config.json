@@ -59,11 +59,16 @@
         "subscribers-list" : "getChannels",
         "by-channel" : "getByChannel",
         "by-top-chart" : "getTopCharts",
-        "get-my-tracks" : "getMyTracks"
+        "get-my-tracks" : "getMyTracks",
+        "get-artists" : "getArtists",
+        "get-artist-albums" : "getArtistAlbums"
     },
     "layouts" : {
         "home" : ["artists","playlists","my-tracks","browse"],
         "browse" : ["featured-playlists","categories","top-charts","new-releases"],
+        "artists" : "get-artists",
+        "get-artists" : "get-artist-albums",
+        "get-artist-albums" : "tracks",
         "featured-playlists" : "featured-list",
         "my-tracks" : "get-my-tracks",
         "top-charts" : "by-top-chart",
