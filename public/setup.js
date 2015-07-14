@@ -128,22 +128,45 @@ function setupGrid(config, layout) {
     }
 
     if(e.keyCode == 37) { // left
-      newId = (((currentId - 1) + tileCount) % gridWidth) + currentRow * gridWidth;
+      if (currentId % gridWidth === 0) {
+        newId = currentId + (gridWidth - 1);
+      } else {
+        newId = currentId - 1;
+      }
+      if (newId >= tileCount) { newId = tileCount - 1; }
+
       $(".selected").removeClass("selected");
       $("#"+newId.toString()).addClass("selected");
     }
     else if (e.keyCode == 38) { // up
-      newId = ((currentId - (gridWidth)) + tileCount) % tileCount;
+      if (currentId - gridWidth < 0) {
+        newId = currentId + (gridWidth * (gridHeight-1));
+      } else {
+        newId = currentId - gridWidth;
+      }
+      if (newId >= tileCount) { newId = tileCount - 1; }
+
       $(".selected").removeClass("selected");
       $("#"+newId.toString()).addClass("selected");
     }
     else if(e.keyCode == 39) { // right
-      newId = (((currentId + 1) + tileCount) % gridWidth) + currentRow * gridWidth;
+      newId = currentId + 1;
+      if (newId % gridWidth === 0) {
+        newId -= gridWidth;
+      }
+      if (newId >= tileCount) { newId = tileCount - 1; }
+
       $(".selected").removeClass("selected");
       $("#"+newId.toString()).addClass("selected");
     }
     else if(e.keyCode == 40) { // down
-      newId = ((currentId + (gridWidth)) + tileCount) % tileCount;
+      if (currentId + gridWidth > gridHeight * gridWidth) {
+        newId = currentId - (gridWidth * (gridHeight-1));
+      } else {
+        newId = currentId + gridWidth;
+      }
+      if (newId >= tileCount) { newId = tileCount - 1; }
+
       $(".selected").removeClass("selected");
       $("#"+newId.toString()).addClass("selected");
     }
@@ -247,6 +270,20 @@ function getGridDimensions(tiles) {
       }
     }
   return [parseInt(width), parseInt(height)];
+}
+
+function addNowPlaying() {
+  $('body').css('padding-bottom', '50px');
+
+  jQuery('<div/>', {
+    class: "now-playing",
+    text: "Now Playing"
+  }).appendTo('body');
+}
+
+function removeNowPlaying() {
+  $('body').css('padding-bottom', '0');
+  $("div.now-playing").eq(-1).remove();
 }
 
 function openResource(id) {

@@ -1,5 +1,6 @@
 body {
     padding-top: 50px;
+    padding-bottom: 0;
 }
 
 body, html, .eminem-wraps {
@@ -50,6 +51,12 @@ body, html, .eminem-wraps {
 .selected {
     border-color: yellow;
     border-width: 3px;
+}
+
+.now-playing {
+    height: 50px;
+    width: 100%;
+    background-color: black;
 }
 
 #hidden {
