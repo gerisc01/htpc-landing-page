@@ -38,8 +38,6 @@
         }
 
         .player-controls {
-            border: solid;
-            border-color: black;
             height: 30%;
             width: 70%;
             text-align: center;
@@ -53,14 +51,14 @@
         }
 
         .control-button {
-            border: solid;
             max-height: 100%;
             display: inline-block;
             margin-left: auto;
             margin-right: auto;
         }
         .control-button img {
-            max-height:100%;
+            max-height:75%;
+            width: auto;
         }
         .control-button.left {
             float: left;
@@ -68,25 +66,33 @@
         .control-button.right {
             float:right;
         }
+
+        #np-container .selected {
+            background-color: Aquamarine;
+        }
     </style>
+    <script src="../public/jquery-1.11.2.min.js"></script>
+    <script src="player-controls-nav.js"></script>
   </head>
   <body>
-    <div class="queue">
-        This is a queue!
-    </div>
-    <div class="content">
-        <div class="np-details">
-            <div><img src="album-art.jpeg"/></div>
+    <div id="np-container">
+        <div class="queue">
+            This is a queue!
         </div>
-        <div class="player-controls">
-            <div class="button-row">
-                <div class="control-button left" id="0"><img src="icons/previous.png"/></div>
-                <div class="control-button" id="1"><img style="display:none;" src="icons/play.png"/><img src="icons/pause.png"/></div>
-                <div class="control-button right" id="2"><img src="icons/next.png"/></div>
+        <div class="content">
+            <div class="np-details">
+                <div><img src="album-art.jpeg"/></div>
             </div>
-            <div class="button-row">
-                <div class="control-button left" id="3"><img src="icons/shuffle.png"/></div>
-                <div class="control-button right" id="4"><img src="icons/repeat.png"/></div>
+            <div class="player-controls">
+                <div class="button-row">
+                    <div class="control-button left" id="previous"><img src="icons/previous.png"/></div>
+                    <div class="control-button selected" id="play-pause"><img style="display:none;" src="icons/play.png"/><img src="icons/pause.png"/></div>
+                    <div class="control-button right" id="next"><img src="icons/next.png"/></div>
+                </div>
+                <div class="button-row">
+                    <div class="control-button left" id="shuffle"><img src="icons/shuffle.png"/></div>
+                    <div class="control-button right" id="repeat"><img src="icons/repeat.png"/></div>
+                </div>
             </div>
         </div>
     </div>

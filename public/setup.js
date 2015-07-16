@@ -46,16 +46,21 @@ function setupGrid(config, layout) {
   // Using the tileMap to easily access information for
   // the tiles after one is selected.
   tileMap = {};
+  var plugin = config[i];
+    jQuery('<div/>', {
+      id: "grid-container",
+      class: "eminem-wraps"
+    }).appendTo('#load-container');
   /***************************************************************************
                           CREATE THE MEDIA TILES
   ****************************************************************************/
   for (var i = 0; i < config.length; i++) {
-    var plugin = config[i];
+    plugin = config[i];
     jQuery('<div/>', {
           id: tileCount,
           class: "img-wrapper",
           title: plugin.id
-      }).appendTo('#load-container');
+      }).appendTo('#grid-container');
 
       var imgFile;
       var tileClass = "tile-pic";
@@ -116,84 +121,85 @@ function setupGrid(config, layout) {
                        ACTIVATE KEYBOARD NAVIGATION
   ****************************************************************************/
   $("body").keydown(function(e) {
-    var currentSelected;
-    var currentId;
-    var currentRow;
-    var newId;
-    // If any of the directional keys are pressed
-    if ($.inArray(e.keyCode,[8,13,37,38,39,40]) != -1) {
-      currentSelected = $(".selected")[0];
-      currentId = parseInt(currentSelected.id);
-      currentRow = Math.floor((currentId)/gridWidth);
-    }
-
-    if(e.keyCode == 37) { // left
-      if (currentId % gridWidth === 0) {
-        newId = currentId + (gridWidth - 1);
-      } else {
-        newId = currentId - 1;
+    if ($("#grid-container").length) {
+      var currentSelected;
+      var currentId;
+      var currentRow;
+      var newId;
+      // If any of the directional keys are pressed
+      if ($.inArray(e.keyCode,[8,13,37,38,39,40]) != -1) {
+        currentSelected = $(".selected")[0];
+        currentId = parseInt(currentSelected.id);
+        currentRow = Math.floor((currentId)/gridWidth);
       }
-      if (newId >= tileCount) { newId = tileCount - 1; }
 
-      $(".selected").removeClass("selected");
-      $("#"+newId.toString()).addClass("selected");
-    }
-    else if (e.keyCode == 38) { // up
-      if (currentId - gridWidth < 0) {
-        newId = currentId + (gridWidth * (gridHeight-1));
-      } else {
-        newId = currentId - gridWidth;
-      }
-      if (newId >= tileCount) { newId = tileCount - 1; }
-
-      $(".selected").removeClass("selected");
-      $("#"+newId.toString()).addClass("selected");
-    }
-    else if(e.keyCode == 39) { // right
-      newId = currentId + 1;
-      if (newId % gridWidth === 0) {
-        newId -= gridWidth;
-      }
-      if (newId >= tileCount) { newId = tileCount - 1; }
-
-      $(".selected").removeClass("selected");
-      $("#"+newId.toString()).addClass("selected");
-    }
-    else if(e.keyCode == 40) { // down
-      if (currentId + gridWidth > gridHeight * gridWidth) {
-        newId = currentId - (gridWidth * (gridHeight-1));
-      } else {
-        newId = currentId + gridWidth;
-      }
-      if (newId >= tileCount) { newId = tileCount - 1; }
-
-      $(".selected").removeClass("selected");
-      $("#"+newId.toString()).addClass("selected");
-    }
-    else if (e.keyCode == 13) { // Enter
-      if (currentPlugin === null) {
-        currentPlugin = currentSelected.title;
-        $.get("/"+currentPlugin+"/init");
-      }
-      var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
-      var nextLayout = $(".selected #layout").val();
-      if (nextLayout === "") {
-        openResource(currentSelected.title);
-      } else {
-        if (currentSelected.title === "") {
-          re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
-          if (re.exec(nextLayout) !== null) {
-            configLocation = null;
-          }
+      if(e.keyCode == 37) { // left
+        if (currentId % gridWidth === 0) {
+          newId = currentId + (gridWidth - 1);
         } else {
-          addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout, currentSelected.title);
+          newId = currentId - 1;
         }
-        clearLayout();
-        var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
-        setupGrid(configObj, nextLayout);
+        if (newId >= tileCount) { newId = tileCount - 1; }
+
+        $(".selected").removeClass("selected");
+        $("#"+newId.toString()).addClass("selected");
       }
-    }
-    else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {
+      else if (e.keyCode == 38) { // up
+        if (currentId - gridWidth < 0) {
+          newId = currentId + (gridWidth * (gridHeight-1));
+        } else {
+          newId = currentId - gridWidth;
+        }
+        if (newId >= tileCount) { newId = tileCount - 1; }
+
+        $(".selected").removeClass("selected");
+        $("#"+newId.toString()).addClass("selected");
+      }
+      else if(e.keyCode == 39) { // right
+        newId = currentId + 1;
+        if (newId % gridWidth === 0) {
+          newId -= gridWidth;
+        }
+        if (newId >= tileCount) { newId = tileCount - 1; }
+
+        $(".selected").removeClass("selected");
+        $("#"+newId.toString()).addClass("selected");
+      }
+      else if(e.keyCode == 40) { // down
+        if (currentId + gridWidth > gridHeight * gridWidth) {
+          newId = currentId - (gridWidth * (gridHeight-1));
+        } else {
+          newId = currentId + gridWidth;
+        }
+        if (newId >= tileCount) { newId = tileCount - 1; }
+
+        $(".selected").removeClass("selected");
+        $("#"+newId.toString()).addClass("selected");
+      }
+      else if (e.keyCode == 13) { // Enter
+        if (currentPlugin === null) {
+          currentPlugin = currentSelected.title;
+          $.get("/"+currentPlugin+"/init");
+        }
+        var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
+        var nextLayout = $(".selected #layout").val();
+        if (nextLayout === "") {
+          openResource(currentSelected.title);
+        } else {
+          if (currentSelected.title === "") {
+            re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
+            if (re.exec(nextLayout) !== null) {
+              configLocation = null;
+            }
+          } else {
+            addToNavbar(tileMap[currentSelected.title].title, currentPlugin, nextLayout, currentSelected.title);
+          }
+          clearLayout();
+          var configObj = getGridConfig(configLocation, nextLayout, currentSelected.title);
+          setupGrid(configObj, nextLayout);
+        }
+      }
+      else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {
         e.preventDefault();
         if ($("ul.nav li").size() > 1) {
           var prevLayout = $("ul.nav li").eq(-2).children("#layout").val();
@@ -208,6 +214,7 @@ function setupGrid(config, layout) {
           $("ul.nav li").eq(-1).remove();
           $("ul.nav li").eq(-1).addClass("active");
         }
+      }
     }
   });
 }
