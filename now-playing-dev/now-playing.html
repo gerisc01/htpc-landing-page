@@ -70,6 +70,10 @@
         #np-container .selected {
             background-color: Aquamarine;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
     <script src="../public/jquery-1.11.2.min.js"></script>
     <script src="player-controls-nav.js"></script>
@@ -86,7 +90,10 @@
             <div class="player-controls">
                 <div class="button-row">
                     <div class="control-button left" id="previous"><img src="icons/previous.png"/></div>
-                    <div class="control-button selected" id="play-pause"><img style="display:none;" src="icons/play.png"/><img src="icons/pause.png"/></div>
+                    <div class="control-button selected" id="play-pause">
+                        <img id="play" class="hidden" src="icons/play.png"/>
+                        <img id="pause" src="icons/pause.png"/>
+                    </div>
                     <div class="control-button right" id="next"><img src="icons/next.png"/></div>
                 </div>
                 <div class="button-row">

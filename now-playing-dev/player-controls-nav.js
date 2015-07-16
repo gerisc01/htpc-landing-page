@@ -59,7 +59,27 @@ $(function() {
         }
       }
       else if (e.keyCode == 13) { // Enter
-
+          if (currentId == "play-pause") {
+            var hidden = $("#play-pause img.hidden")[0];
+            $("#play-pause img.hidden").removeClass("hidden");
+            if (hidden.id === "play") {
+              $("#play-pause img#pause").addClass("hidden");
+            } else {
+              $("#play-pause img#play").addClass("hidden");
+            }
+          } else if (currentId == "shuffle") {
+            console.log("Attempting to change shuffle!");
+            var src = $("#shuffle img")[0].src;
+            if (src.match(/shuffle.png/)) {
+              console.log("Decting standard shuffle");
+              src = src.replace("shuffle.png","shuffle-selected.png");
+            } else {
+              console.log("Decting selected shuffle");
+              src = src.replace("shuffle-selected.png","shuffle.png");
+            }
+            console.log(src);
+            $("#shuffle img").attr("src",src);
+          }
         }
       }
       else if (e.keyCode == 8 && !$(e.target).is("input, textarea")) {

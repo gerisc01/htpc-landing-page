@@ -48,7 +48,7 @@ body, html, .eminem-wraps {
     overflow: hidden;
 }
 
-.selected {
+#grid-container .selected {
     border-color: yellow;
     border-width: 3px;
 }
@@ -60,5 +60,9 @@ body, html, .eminem-wraps {
 }
 
 #hidden {
+    display:none;
+}
+
+.hidden {
     display: none;
 }
