@@ -51,23 +51,25 @@ class YouTube
     end
 
     # Currently works on every number up to 172
-    def getPageSize(count, pageSize)
-        idealPageCounts = [6,8,9,12,15,16]
-        currentCount = count
-        page = 1
-        while (currentCount > 0)
-            lostTiles = (page == 1 || currentCount < pageSize - 1) ? 1 : 2
-            if (currentCount - (pageSize-lostTiles)) <= 0
-                finalPageSize = currentCount + 1
-                if finalPageSize <  5
-                    newPageCount = idealPageCounts[idealPageCounts.index(pageSize)-1]
-                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE" if newPageCount > pageSize
-                    return getPageSize(count, newPageCount)
+    def getPageSize(count, maxPageSize)
+        idealPageCounts = [4,6,8,9,12,15,16]
+        if count <= maxPageSize
+            return maxPageSize
+        else
+            # Figure out how many pages are needed
+            for j in 2..100
+                if count <= (maxPageSize * j) - (2*j-2)
+                    # j is the amount of pages needed
+                    # real_count is the count including navigation arrows
+                    real_count = count + (2*j-2)
+                    for size in idealPageCounts.reverse
+                        if real_count - (j-1) * size > 3
+                            return size
+                        end
+                    end
+                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE"
                 end
-                return pageSize
             end
-            currentCount -= (pageSize - lostTiles)
-            page += 1
         end
     end
 

@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>Now Playing</title>
+    <style>
+        body, html {
+            height: 99%;
+        }
+
+        .queue {
+            width: 30%;
+            float: left;
+        }
+
+        .content {
+            width: 70%;
+            height: 100%;
+            float: left;
+        }
+
+        .np-details {
+            text-align: center;
+            height: 70%;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .album-wrapper {
+            height: 100%;
+            width: auto;
+            display: inline-block;
+            vertical-align: middle
+        }
+
+        .np-details img {
+            height: 75%;
+            width: auto;
+            padding-top: 5%;
+        }
+
+        .player-controls {
+            border: solid;
+            border-color: black;
+            height: 30%;
+            width: 70%;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .player-controls.button-row {
+            height: 48%;
+            margin-bottom: 2%;
+        }
+
+        .control-button {
+            border: solid;
+            max-height: 100%;
+            display: inline-block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .control-button img {
+            max-height:100%;
+        }
+        .control-button.left {
+            float: left;
+        }
+        .control-button.right {
+            float:right;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="queue">
+        This is a queue!
+    </div>
+    <div class="content">
+        <div class="np-details">
+            <div><img src="album-art.jpeg"/></div>
+        </div>
+        <div class="player-controls">
+            <div class="button-row">
+                <div class="control-button left" id="0"><img src="icons/previous.png"/></div>
+                <div class="control-button" id="1"><img style="display:none;" src="icons/play.png"/><img src="icons/pause.png"/></div>
+                <div class="control-button right" id="2"><img src="icons/next.png"/></div>
+            </div>
+            <div class="button-row">
+                <div class="control-button left" id="3"><img src="icons/shuffle.png"/></div>
+                <div class="control-button right" id="4"><img src="icons/repeat.png"/></div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>

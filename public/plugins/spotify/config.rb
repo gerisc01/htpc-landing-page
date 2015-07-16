@@ -45,23 +45,25 @@ class Spotify
     end
 
     # Currently works on every number up to 172
-    def getPageSize(count, pageSize)
-        idealPageCounts = [6,8,9,12,15,16]
-        currentCount = count
-        page = 1
-        while (currentCount > 0)
-            lostTiles = (page == 1 || currentCount < pageSize - 1) ? 1 : 2
-            if (currentCount - (pageSize-lostTiles)) <= 0 || count > 500
-                finalPageSize = currentCount + 1
-                if finalPageSize <  5
-                    newPageCount = idealPageCounts[idealPageCounts.index(pageSize)-1]
-                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE" if newPageCount > pageSize
-                    return getPageSize(count, newPageCount)
+    def getPageSize(count, maxPageSize)
+        idealPageCounts = [4,6,8,9,12,15,16]
+        if count <= maxPageSize
+            return maxPageSize
+        else
+            # Figure out how many pages are needed
+            for j in 2..100
+                if count <= (maxPageSize * j) - (2*j-2)
+                    # j is the amount of pages needed
+                    # real_count is the count including navigation arrows
+                    real_count = count + (2*j-2)
+                    for size in idealPageCounts.reverse
+                        if real_count - (j-1) * size > 3
+                            return size
+                        end
+                    end
+                    raise StandardError, "FAILURE: CAN'T RETRIEVE PAGE SIZE"
                 end
-                return pageSize
             end
-            currentCount -= (pageSize - lostTiles)
-            page += 1
         end
     end
 
@@ -124,9 +126,14 @@ class Spotify
             params["count"] = json["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -239,9 +246,14 @@ class Spotify
             params["count"] = json["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -343,9 +355,14 @@ class Spotify
             params["count"] = json["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -448,9 +465,14 @@ class Spotify
             params["count"] = json["playlists"]["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -542,9 +564,14 @@ class Spotify
             params["count"] = json["categories"]["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -637,9 +664,14 @@ class Spotify
             params["count"] = json["playlists"]["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -731,9 +763,14 @@ class Spotify
             params["count"] = json["albums"]["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = ((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3;
             items = items.slice(0,params["limit"].to_i)
         end
 
@@ -807,9 +844,14 @@ class Spotify
             params["count"] = @artists.size
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
             # items = items.slice(0,params["limit"].to_i)
         end
 
@@ -923,9 +965,14 @@ class Spotify
             params["count"] = json["total"]
             params["page"] = "1"
             pageSize = getPageSize(params["count"].to_i, params["limit"].to_i)
-            params["limit"] = pageSize - 1 # Figure out why subtracting by 1?
+            if params["count"].to_i > pageSize
+                params["limit"] = (pageSize - 1).to_s
+                params["last_page"] = (((params["count"].to_i - 1 - (pageSize-1)*2)/(pageSize-2)) + 3).to_s
+            else
+                params["limit"] = pageSize.to_s
+                params["last_page"] = "1"
+            end
             params["offset"] = 0
-            params["last_page"] = (((params["count"].to_i - (pageSize-1)*2)/(pageSize-2)) + 3).to_s;
             albums = albums.slice(0,params["limit"].to_i)
         end
 
