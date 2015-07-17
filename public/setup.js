@@ -257,26 +257,19 @@ function addToNavbar(title, plugin, layout, id) {
 }
 
 function getGridDimensions(tiles) {
-    var width = 0;
-    var height = 0;
-    for (i = 2; i < tiles; i++) {
-      var possDims = {};
-      var division = (tiles/i).toString();
-      if (division.indexOf(".") == -1) {
-        possDims[division] = i;
-      }
-
-      for (var key in possDims) {
-        if (possDims.hasOwnProperty(key)) {
-          if (width === 0 || key > width ||
-            Math.abs(width-height) > Math.abs(key-possDims[key])) {
-            width = key;
-            height = possDims[key];
-          }
+  var width = 0;
+  var height = 0;
+  for (i = 1; i < 11; i++) {
+    if (tiles < i*i) {
+      height = i - 1;
+      for (j = height; j < 12; j++) {
+        if (tiles <= j*height) {
+          width = j;
+          return [parseInt(width), parseInt(height)];
         }
       }
     }
-  return [parseInt(width), parseInt(height)];
+  }
 }
 
 function addNowPlaying() {
