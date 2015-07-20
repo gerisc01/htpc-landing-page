@@ -205,6 +205,7 @@ function setupGrid(config, layout) {
           var prevLayout = $("ul.nav li").eq(-2).children("#layout").val();
           var id = $("ul.nav li").eq(-2).children("#id").val();
           if ($("ul.nav li").eq(-2).children("#plugin").val() === "") {
+            $.get("/"+currentPlugin+"/destroy");
             currentPlugin = null;
           }
           var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";

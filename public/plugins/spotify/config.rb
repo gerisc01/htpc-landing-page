@@ -14,9 +14,6 @@ class Spotify
         end
 
         begin
-            #startMopidy()
-            #puts @mopidy_pid
-            #sleep(2)
             startListening()
         rescue Exception => e
             # raise e
@@ -39,8 +36,8 @@ class Spotify
     end
 
     def destroy(params)
-        if defined? @mopidy_pid
-            endMopidy()
+        if defined? @ws
+            stopListening()
         end
     end
 
@@ -80,24 +77,40 @@ class Spotify
     def startListening()
         require 'websocket-client-simple'
 
-        ws = WebSocket::Client::Simple.connect 'http://127.0.0.1:6680/mopidy/ws'
+        puts "Starting Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
+        @now_playing = WebSocket::Client::Simple.connect 'ws://127.0.0.1:4567/nowplaying/ws'
+        @mopidy_ws = WebSocket::Client::Simple.connect 'http://127.0.0.1:6680/mopidy/ws'
 
-        ws.on :message do |msg|
+        @mopidy_ws.on :message do |msg|
           puts msg.data
         end
 
-        ws.on :open do
-          ws.send 'hello!!!'
+        @mopidy_ws.on :open do
+          # @mopidy_ws.send 'hello!!!'
+          puts @now_playing.inspect
         end
 
-        ws.on :close do |e|
+        @mopidy_ws.on :close do |e|
           p e
-          exit 1
         end
 
-        ws.on :error do |e|
+        @mopidy_ws.on :error do |e|
           p e
         end
+
+        for i in 0..10
+            if @now_playing.open?
+                @now_playing.send("this is a message")
+                break
+            end
+            puts "Not open yet"
+            sleep(1)
+        end
+    end
+
+    def stopListening()
+        puts "Stopped Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
+        @mopidy_ws.close
     end
 
     def getMyPlaylists(params)

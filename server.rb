@@ -1,5 +1,6 @@
 require 'json'
 require 'sinatra'
+require 'sinatra-websocket'
 
 # Load config file
 config_file = File.new("public/config.json").read
@@ -7,6 +8,9 @@ config_file = File.new("public/config.json").read
 config = JSON.parse config_file
 # Holds the plugin class that is currently intialized
 plugin = nil
+
+set :server, 'thin'
+set :sockets, []
 
 get '/' do
   redirect '/index.html'
@@ -17,6 +21,24 @@ get '/:name/init' do
     title = config["tiles"][params["name"]]["title"]
     obj = Object.const_get(title.gsub(" ",""))
     plugin = obj.new
+end
+
+get '/nowplaying/ws' do
+    request.websocket do |ws|
+      ws.onopen do
+        ws.send("websocket opened")
+        settings.sockets << ws
+      end
+      ws.onmessage do |msg|
+        puts msg
+        EM.next_tick { settings.sockets.each{|s| s.send(msg) } }
+      end
+      ws.onclose do
+        warn("websocket closed")
+        settings.sockets.delete(ws)
+      end
+
+    end
 end
 
 get '/:name/getResourceUrl' do
