@@ -20,7 +20,7 @@ get '/:name/init' do
     require "./public/plugins/#{params["name"]}/config"
     title = config["tiles"][params["name"]]["title"]
     obj = Object.const_get(title.gsub(" ",""))
-    plugin = obj.new
+    plugin = obj::Navigation.new
 end
 
 get '/nowplaying/ws' do
@@ -40,7 +40,7 @@ get '/nowplaying/ws' do
     end
 end
 
-get '/:name/nowplaying/:method'
+get '/:name/nowplaying/:method' do
     puts "Sending to method with params... #{params.inspect}"
 end
 

@@ -4,7 +4,8 @@ module Spotify
             require 'restclient'
             require 'base64'
             require 'json'
-            require './now-playing'
+            require 'websocket-client-simple'
+            require_relative 'now-playing.rb'
             @user_id = "scott.gerike"
             @client_id = "6a4ec190bc1b405099a8256f17c456d1"
             @client_secret = "e9f5adc49029473f93add702787b676f"
@@ -18,7 +19,7 @@ module Spotify
             begin
                 startListening()
             rescue Exception => e
-                # raise e
+                raise e
             end
         end
 
@@ -72,34 +73,50 @@ module Spotify
         end
 
         def startListening()
-            puts "Starting Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
-            @now_playing = WebSocket::Client::Simple.connect 'ws://127.0.0.1:4567/nowplaying/ws'
+            now_playing = WebSocket::Client::Simple.connect 'ws://127.0.0.1:4567/nowplaying/ws'
             @mopidy_ws = WebSocket::Client::Simple.connect 'http://127.0.0.1:6680/mopidy/ws'
 
+            for i in 1..10
+                if now_playing.open?
+                    now_playing.send("Started Listening to Spotify/Mopidy")
+                    break
+                end
+                puts "Waiting to open"
+                sleep(1)
+            end
+
             @mopidy_ws.on :message do |msg|
-              puts msg.data
+                #puts a.inspect
+                #puts now_playing.inspect
+                now_playing.send(msg.data)
             end
 
             @mopidy_ws.on :open do
-              # @mopidy_ws.send 'hello!!!'
-              puts @now_playing.inspect
+              puts "Starting Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
             end
 
             @mopidy_ws.on :close do |e|
-              p e
+              puts "Stopping Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
             end
 
             @mopidy_ws.on :error do |e|
               p e
             end
+        end
 
-            for i in 0..10
-                if @now_playing.open?
-                    @now_playing.send("this is a message")
-                    break
-                end
-                puts "Not open yet"
-                sleep(1)
+        def parse_event(event_json)
+            # Current possible events
+            # tracklist_changed
+            # playback_state_changed
+            # track_playback_started/track_playback_ended
+            json = JSON.parse(event_json)
+            event = json["event"]
+            msg = {}
+            if event == "playback_state_changed"
+                msg["type"] = "play-pause"
+                msg["new_state"] = json["new_state"]
+            elsif event == "tracklist_changed"
+                msg["type"] = "queue"
             end
         end
 

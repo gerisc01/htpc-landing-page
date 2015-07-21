@@ -21,6 +21,8 @@ var navDirections = {
     }
   };
 
+// var setPlayPause = function()
+
 $(function() {
   $("body").keydown(function(e) {
     if ($("#np-container").length) {
@@ -68,13 +70,10 @@ $(function() {
               $("#play-pause img#play").addClass("hidden");
             }
           } else if (currentId == "shuffle") {
-            console.log("Attempting to change shuffle!");
             var src = $("#shuffle img")[0].src;
             if (src.match(/shuffle.png/)) {
-              console.log("Decting standard shuffle");
               src = src.replace("shuffle.png","shuffle-selected.png");
             } else {
-              console.log("Decting selected shuffle");
               src = src.replace("shuffle-selected.png","shuffle.png");
             }
             console.log(src);
