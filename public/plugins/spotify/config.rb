@@ -10,7 +10,7 @@ module Spotify
             @client_id = "6a4ec190bc1b405099a8256f17c456d1"
             @client_secret = "e9f5adc49029473f93add702787b676f"
             @refresh_token = "AQCrqtaGwPNV2OM1had6fR6ezjBnxXAbasFDFvVX6xAtuV53YJ777KLENEoGA4gAe_Mu2O_XSdKQEuIUHDXU9BRfryuIXEhvidcULZC2xrR1c27WiWkEF6LShTzie2NJFEw"
-            @artists = File.read("/Users/scottgerike/dev/htpc-landing-page/public/plugins/spotify/artists.txt").split("\n")
+            @artists = File.read("/Users/sgerike/Sites/htpc-landing-page/public/plugins/spotify/artists.txt").split("\n")
             # if defined? @token_expire != nil && Time.now > @token_expire
             #     @access_token = auth()
             #     puts @access_token
@@ -85,10 +85,10 @@ module Spotify
                 sleep(1)
             end
 
+            navigation_obj = self
             @mopidy_ws.on :message do |msg|
-                #puts a.inspect
-                #puts now_playing.inspect
-                now_playing.send(msg.data)
+                msg_obj = navigation_obj.parse_event(msg.data.to_s)
+                now_playing.send(msg_obj.to_json)
             end
 
             @mopidy_ws.on :open do
@@ -97,6 +97,7 @@ module Spotify
 
             @mopidy_ws.on :close do |e|
               puts "Stopping Listening to Mopidy on 'http://127.0.0.1:6680/mopidy/ws'"
+              now_playing.close
             end
 
             @mopidy_ws.on :error do |e|
@@ -111,13 +112,18 @@ module Spotify
             # track_playback_started/track_playback_ended
             json = JSON.parse(event_json)
             event = json["event"]
-            msg = {}
+            msg_obj = {}
             if event == "playback_state_changed"
-                msg["type"] = "play-pause"
-                msg["new_state"] = json["new_state"]
+                msg_obj["type"] = "play-pause"
+                if json["new_state"] == "stopped"
+                    msg_obj["new_state"] = "paused"
+                else
+                    msg_obj["new_state"] = json["new_state"]
+                end
             elsif event == "tracklist_changed"
-                msg["type"] = "queue"
+                msg_obj["type"] = "queue"
             end
+            return msg_obj
         end
 
         def getMyPlaylists(params)

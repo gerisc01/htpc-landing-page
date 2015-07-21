@@ -75,13 +75,20 @@
             display: none;
         }
     </style>
-    <script src="../public/jquery-1.11.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="player-controls-nav.js"></script>
   </head>
   <body>
     <div id="np-container">
         <div class="queue">
-            This is a queue!
+            <h3>Previous Tracks</h2>
+            <ul id="previous-tracks"></ul>
+            <hr size="2">
+            <h3>Current Track</h2>
+            <ul id="current-track"></ul>
+            <hr size="2">
+            <h3>Future Tracks</h2>
+            <ul id="future-tracks"></ul>
         </div>
         <div class="content">
             <div class="np-details">

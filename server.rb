@@ -8,6 +8,8 @@ config_file = File.new("public/config.json").read
 config = JSON.parse config_file
 # Holds the plugin class that is currently intialized
 plugin = nil
+navigation = nil
+nowplaying = nil
 
 set :server, 'thin'
 set :sockets, []
@@ -16,11 +18,16 @@ get '/' do
   redirect '/index.html'
 end
 
+get '/nowplaying/init' do
+    nowplaying = plugin::NowPlaying.new
+end
+
 get '/:name/init' do
     require "./public/plugins/#{params["name"]}/config"
     title = config["tiles"][params["name"]]["title"]
-    obj = Object.const_get(title.gsub(" ",""))
-    plugin = obj::Navigation.new
+    plugin = Object.const_get(title.gsub(" ",""))
+    navigation = plugin::Navigation.new
+    nowplaying = plugin::NowPlaying.new # Added for the time being to make life easier
 end
 
 get '/nowplaying/ws' do
@@ -40,13 +47,23 @@ get '/nowplaying/ws' do
     end
 end
 
-get '/:name/nowplaying/:method' do
-    puts "Sending to method with params... #{params.inspect}"
+post '/nowplaying/controls/:control?/?:state?' do
+    if params["state"] != nil
+        nowplaying.send(:"#{params['control']}",params["state"])
+    else
+        nowplaying.send(:"#{params['control']}")
+    end
+end
+
+get '/nowplaying/:method' do
+    content_type "application/json"
+    {}
+    return nowplaying.send(:"#{params["method"]}") if ["queue","info"].include? params["method"]
 end
 
 get '/:name/getResourceUrl' do
     content_type "application/json"
-    url = plugin.send(:getResourceUrl, params["id"])
+    url = navigation.send(:getResourceUrl, params["id"])
     return {"url" => url}.to_json
 end
 
@@ -54,5 +71,5 @@ get '/:name/:method' do
     content_type "application/json"
     methodParams = params.select{|params| !["splat", "captures"].include?(params)}
     puts "Sending to method with params... #{params.inspect}"
-    return plugin.send(:"#{params["method"]}",methodParams)
+    return navigation.send(:"#{params["method"]}",methodParams)
 end
