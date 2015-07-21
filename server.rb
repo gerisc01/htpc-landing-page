@@ -37,8 +37,11 @@ get '/nowplaying/ws' do
         warn("websocket closed")
         settings.sockets.delete(ws)
       end
-
     end
+end
+
+get '/:name/nowplaying/:method'
+    puts "Sending to method with params... #{params.inspect}"
 end
 
 get '/:name/getResourceUrl' do
@@ -47,9 +50,6 @@ get '/:name/getResourceUrl' do
     return {"url" => url}.to_json
 end
 
-# http.htpc.dev/youtube/get_subs?limit=&page=&token=&count=
-# {"splat"=>[], "captures"=>["youtube", "getChannels"], "name"=>"youtube", "method"=>"getChannels"}
-#{"nextPageToken"=>"CAAQAA", "pageInfo"=>{"totalResults"=>20, "resultsPerPage"=>0}, "items"=>[]}
 get '/:name/:method' do
     content_type "application/json"
     methodParams = params.select{|params| !["splat", "captures"].include?(params)}
