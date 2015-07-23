@@ -1,7 +1,8 @@
 module Spotify
     class NowPlaying
         def initialize()
-            
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.tracklist.set_consume","params" => [true]}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
         end
 
         def play()

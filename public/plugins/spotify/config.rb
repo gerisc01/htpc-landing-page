@@ -11,10 +11,10 @@ module Spotify
             @client_secret = "e9f5adc49029473f93add702787b676f"
             @refresh_token = "AQCrqtaGwPNV2OM1had6fR6ezjBnxXAbasFDFvVX6xAtuV53YJ777KLENEoGA4gAe_Mu2O_XSdKQEuIUHDXU9BRfryuIXEhvidcULZC2xrR1c27WiWkEF6LShTzie2NJFEw"
             @artists = File.read("/Users/sgerike/Sites/htpc-landing-page/public/plugins/spotify/artists.txt").split("\n")
-            # if defined? @token_expire != nil && Time.now > @token_expire
-            #     @access_token = auth()
-            #     puts @access_token
-            # end
+            if defined? @token_expire != nil && Time.now > @token_expire
+                @access_token = auth()
+                puts @access_token
+            end
 
             begin
                 startListening()
@@ -124,6 +124,89 @@ module Spotify
                 msg_obj["type"] = "queue"
             end
             return msg_obj
+        end
+
+        def openResource(params)
+            #== Params
+            # *id*: The id of the resource that you are opening
+            # *parentId*: The parent of the id that was passed (album, playlist, etc)
+
+            uris = []
+            if match = params["parentId"].match(/spotify:user:(.*?):playlist:(.*?)\z/i)
+                req_params = {"fields" => "items.track.uri,total,next"}
+
+                user, id = match.captures
+                begin
+                    resp = RestClient.get("https://api.spotify.com/v1/users/#{user}/playlists/#{id}/tracks", :params => req_params, :authorization => "Bearer #{@access_token}")
+                rescue RestClient::Exception => ex
+                    puts ex.inspect
+                end
+
+                resp = JSON.parse(resp)
+                for item in resp["items"]
+                    uris.push item["track"]["uri"]
+                end
+
+                # If next is null, get the total and thread the same call to http to add the rest of the tracks
+                # threads = for i in 5.times.map do
+                #     j = i + offset
+                #     Thread.new do
+                #         if j < count
+                #             resource["#{subscription_id}/services/hostedservices/#{cloud_service_ids[j]}?embed-detail=true"].get
+                #         end
+                #     end
+                # end
+
+            elsif match = params["id"].match(/spotify:album:(.*?)\z/i)
+                req_params = {"limit" => "50"}
+
+                id = match.captures.first
+                begin
+                    resp = RestClient.get("https://api.spotify.com/v1/albums/#{id}/tracks", :params => req_params, :authorization => "Bearer #{@access_token}")
+                rescue RestClient::Exception => ex
+                    puts ex.inspect
+                end
+
+                # If next is null, get the total and thread the same call to http to add the rest of the tracks
+                # threads = for i in 5.times.map do
+                #     j = i + offset
+                #     Thread.new do
+                #         if j < count
+                #             resource["#{subscription_id}/services/hostedservices/#{cloud_service_ids[j]}?embed-detail=true"].get
+                #         end
+                #     end
+                # end
+            end
+
+            start = uris.index params["id"]
+            uris.shift start
+
+            # Adding the a small chunk of songs to the tracklist and then playing
+            # so that there isn't a long wait before music plays, then add the rest
+
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.tracklist.clear","params" => []}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
+
+            beg = Time.now
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.tracklist.add","params" => [nil,nil,nil,uris.shift(1)]}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
+            puts "Adding 1 song takes -- #{Time.now-beg}"
+
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.playback.play","params" => []}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
+
+            beg = Time.now
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.tracklist.add","params" => [nil,nil,nil,uris.shift(10)]}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
+            puts "Adding 20 song takes -- #{Time.now-beg}"
+
+            beg = Time.now
+            params = {"jsonrpc" => "2.0","id" => 1,"method" => "core.tracklist.add","params" => [nil,nil,nil,uris.shift(20)]}
+            RestClient.post("http://localhost:6680/mopidy/rpc",params.to_json,:content_type => :json)
+            puts "Adding #{20} song takes -- #{Time.now-beg}"
+
+
+            return {"type" => "audio"}.to_json
         end
 
         def getMyPlaylists(params)

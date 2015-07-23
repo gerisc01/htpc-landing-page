@@ -184,7 +184,8 @@ function setupGrid(config, layout) {
         var configLocation = currentPlugin === null ? "config.json" : "plugins/" + currentPlugin + "/config.json";
         var nextLayout = $(".selected #layout").val();
         if (nextLayout === "") {
-          openResource(currentSelected.title);
+
+          openResource(currentSelected.title,$("ul.nav li").eq(-1).children("#id").val());
         } else {
           if (currentSelected.title === "") {
             re = RegExp("^\\/" + currentPlugin + "\\/(.*)\\?");
@@ -287,9 +288,21 @@ function removeNowPlaying() {
   $("div.now-playing").eq(-1).remove();
 }
 
-function openResource(id) {
-  var endpoint = "/" + currentPlugin + "/getResourceUrl?id=" + id;
-  resp = $.get(endpoint);
-  url = resp.responseJSON.url;
-  window.open(url, '_blank');
+function openResource(id, parentId) {
+  var endpoint = "/" + currentPlugin + "/openResource?id=" + id;
+  if (parentId !== undefined) { endpoint += "&parentId=" + parentId; }
+  $.getJSON(endpoint, function(result) {
+    handleOpenResource(result);
+  });
+}
+
+function handleOpenResource(resp) {
+  if (resp.type === "audio") {
+    addNowPlaying();
+  } else if (resp.type === "video") {
+
+  } else if (resp.type === "external") {
+    url = resp.responseJSON.url;
+    window.open(url, '_blank');
+  }
 }
